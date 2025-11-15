@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: merchant-dashboard-smart
+  namespace: platform-services
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: dashboard.fv-company.com
+    http:
+      paths:
+      # API routes go to platform-api
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: platform-api
+            port:
+              number: 8080
+      # All other routes go to merchant dashboard
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: merchant-dashboard-blue
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - dashboard.fv-company.com
+    secretName: merchant-dashboard-tls
