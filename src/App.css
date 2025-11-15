@@ -440,6 +440,10 @@ body {
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s;
+  text-decoration: none;
+  color: #202223;
+  display: inline-block;
+  text-align: center;
 }
 
 .btn-secondary:hover {

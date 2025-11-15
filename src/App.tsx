@@ -8,7 +8,7 @@ const API_URL = '/api';
 
 interface AuthResponse {
   token: string;
-  user: { id: number; email: string; role: string };
+  user: { id: number; email: string; role: string; subdomain?: string };
 }
 
 interface Stats {
@@ -109,6 +109,14 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const axiosConfig = { headers: { Authorization: `Bearer ${token}` } };
 
+  const { data: user } = useQuery({
+    queryKey: ['user'],
+    queryFn: async () => {
+      const response = await axios.get(`${API_URL}/user`, axiosConfig);
+      return response.data;
+    },
+  });
+
   const { data: stats } = useQuery<Stats>({
     queryKey: ['stats'],
     queryFn: async () => {
@@ -145,7 +153,7 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
       case 'apps':
         return <AppsContent />;
       case 'online-store':
-        return <OnlineStoreContent />;
+        return <OnlineStoreContent user={user} />;
       case 'settings':
         return <SettingsContent />;
       default:
@@ -474,7 +482,22 @@ function AppsContent() {
   );
 }
 
-function OnlineStoreContent() {
+function OnlineStoreContent({ user }: { user?: { subdomain?: string; email?: string } }) {
+  // Bepaal de store URL op basis van subdomain of email
+  const getStoreUrl = () => {
+    if (user?.subdomain) {
+      return `https://${user.subdomain}.fv-company.com`;
+    }
+    // Fallback: gebruik email prefix als subdomain
+    if (user?.email) {
+      const emailPrefix = user.email.split('@')[0];
+      return `https://${emailPrefix}.fv-company.com`;
+    }
+    return 'https://yourstore.fv-company.com';
+  };
+
+  const storeUrl = getStoreUrl();
+
   return (
     <div className="page-content">
       <div className="page-header">
@@ -488,11 +511,11 @@ function OnlineStoreContent() {
         </div>
         <div className="card-body">
           <div className="store-preview">
-            <p><strong>Store URL:</strong> https://demo.fv-company.com</p>
+            <p><strong>Store URL:</strong> {storeUrl}</p>
             <p><strong>Theme:</strong> Default Theme</p>
             <p><strong>Status:</strong> <span className="badge badge-success">Published</span></p>
             <div className="store-actions">
-              <button className="btn-secondary">View store</button>
+              <a href={storeUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary">View store</a>
               <button className="btn-secondary">Customize</button>
             </div>
           </div>
