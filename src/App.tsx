@@ -121,8 +121,31 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
     queryKey: ['user'],
     queryFn: async () => {
       const response = await axios.get(`${API_URL}/user`, axiosConfig);
+      // Update localStorage met nieuwe data
+      if (response.data) {
+        const userData = {
+          id: response.data.id,
+          email: response.data.email,
+          fullName: response.data.fullName,
+          role: response.data.role,
+          subdomain: response.data.subdomain,
+        };
+        localStorage.setItem('merchant_user', JSON.stringify(userData));
+        
+        if (response.data.subdomain) {
+          const tenantData = {
+            subdomain: response.data.subdomain,
+            storeName: response.data.storeName,
+            storeUrl: response.data.storeUrl,
+          };
+          localStorage.setItem('merchant_tenant', JSON.stringify(tenantData));
+        }
+      }
       return response.data;
     },
+    // Refresh elke 5 minuten om data up-to-date te houden
+    staleTime: 5 * 60 * 1000,
+    refetchInterval: 5 * 60 * 1000,
   });
 
   const { data: stats } = useQuery<Stats>({
@@ -491,8 +514,8 @@ function AppsContent() {
 }
 
 function OnlineStoreContent({ user }: { user?: { subdomain?: string; email?: string } }) {
-  // Probeer eerst localStorage tenant data
-  const getTenantData = () => {
+  // Probeer eerst localStorage tenant data als fallback voor snelle render
+  const getLocalTenantData = () => {
     try {
       const tenantData = localStorage.getItem('merchant_tenant');
       if (tenantData) {
@@ -504,17 +527,17 @@ function OnlineStoreContent({ user }: { user?: { subdomain?: string; email?: str
     return null;
   };
 
-  const tenant = getTenantData();
+  const localTenant = getLocalTenantData();
   
-  // Bepaal de store URL op basis van tenant, user subdomain of email
+  // Bepaal de store URL - gebruik API data (user) als die er is, anders localStorage
   const getStoreUrl = () => {
-    // Eerst tenant data van localStorage
-    if (tenant?.subdomain) {
-      return `https://${tenant.subdomain}.fv-company.com`;
-    }
-    // Dan user prop
+    // Eerst API user data (real-time)
     if (user?.subdomain) {
       return `https://${user.subdomain}.fv-company.com`;
+    }
+    // Dan localStorage tenant data (cached)
+    if (localTenant?.subdomain) {
+      return `https://${localTenant.subdomain}.fv-company.com`;
     }
     // Fallback: gebruik email prefix als subdomain
     if (user?.email) {
@@ -525,7 +548,9 @@ function OnlineStoreContent({ user }: { user?: { subdomain?: string; email?: str
   };
 
   const storeUrl = getStoreUrl();
-  const storeName = tenant?.storeName || 'Your Store';
+  const storeName = user?.subdomain ? 
+    (user as any).storeName || localTenant?.storeName || 'Your Store' : 
+    localTenant?.storeName || 'Your Store';
 
   return (
     <div className="page-content">
