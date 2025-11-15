@@ -9,6 +9,7 @@ const API_URL = '/api';
 interface AuthResponse {
   token: string;
   user: { id: number; email: string; role: string; subdomain?: string };
+  tenant?: { id: number; subdomain: string; storeName: string; storeUrl: string };
 }
 
 interface Stats {
@@ -53,6 +54,13 @@ function Login({ onLogin }: { onLogin: (token: string) => void }) {
     try {
       const response = await axios.post<AuthResponse>(`${API_URL}/login`, { email, password });
       localStorage.setItem('merchant_token', response.data.token);
+      // Sla user data op in localStorage
+      if (response.data.user) {
+        localStorage.setItem('merchant_user', JSON.stringify(response.data.user));
+      }
+      if (response.data.tenant) {
+        localStorage.setItem('merchant_tenant', JSON.stringify(response.data.tenant));
+      }
       onLogin(response.data.token);
     } catch (err: unknown) {
       const error = err as { response?: { data?: { error?: string } } };
@@ -483,8 +491,28 @@ function AppsContent() {
 }
 
 function OnlineStoreContent({ user }: { user?: { subdomain?: string; email?: string } }) {
-  // Bepaal de store URL op basis van subdomain of email
+  // Probeer eerst localStorage tenant data
+  const getTenantData = () => {
+    try {
+      const tenantData = localStorage.getItem('merchant_tenant');
+      if (tenantData) {
+        return JSON.parse(tenantData);
+      }
+    } catch (e) {
+      console.error('Failed to parse tenant data:', e);
+    }
+    return null;
+  };
+
+  const tenant = getTenantData();
+  
+  // Bepaal de store URL op basis van tenant, user subdomain of email
   const getStoreUrl = () => {
+    // Eerst tenant data van localStorage
+    if (tenant?.subdomain) {
+      return `https://${tenant.subdomain}.fv-company.com`;
+    }
+    // Dan user prop
     if (user?.subdomain) {
       return `https://${user.subdomain}.fv-company.com`;
     }
@@ -497,6 +525,7 @@ function OnlineStoreContent({ user }: { user?: { subdomain?: string; email?: str
   };
 
   const storeUrl = getStoreUrl();
+  const storeName = tenant?.storeName || 'Your Store';
 
   return (
     <div className="page-content">
@@ -507,7 +536,7 @@ function OnlineStoreContent({ user }: { user?: { subdomain?: string; email?: str
 
       <div className="dashboard-card">
         <div className="card-header">
-          <h3>🌐 Your online store</h3>
+          <h3>🌐 {storeName}</h3>
         </div>
         <div className="card-body">
           <div className="store-preview">
@@ -584,7 +613,9 @@ function App() {
         <Dashboard 
           token={token} 
           onLogout={() => { 
-            localStorage.removeItem('merchant_token'); 
+            localStorage.removeItem('merchant_token');
+            localStorage.removeItem('merchant_user');
+            localStorage.removeItem('merchant_tenant');
             setToken(null); 
           }} 
         />
