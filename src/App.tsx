@@ -51,7 +51,7 @@ function Login({ onLogin }: { onLogin: (token: string) => void }) {
     setError('');
     setLoading(true);
     try {
-      const response = await axios.post<AuthResponse>(\`\${API_URL}/login\`, { email, password });
+      const response = await axios.post<AuthResponse>(`${API_URL}/login`, { email, password });
       localStorage.setItem('merchant_token', response.data.token);
       onLogin(response.data.token);
     } catch (err: unknown) {
@@ -107,12 +107,12 @@ function Login({ onLogin }: { onLogin: (token: string) => void }) {
 function Dashboard({ token, onLogout }: { token: string; onLogout: () => void }) {
   const [activeMenu, setActiveMenu] = useState<MenuItem>('home');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const axiosConfig = { headers: { Authorization: \`Bearer \${token}\` } };
+  const axiosConfig = { headers: { Authorization: `Bearer ${token}` } };
 
   const { data: stats } = useQuery<Stats>({
     queryKey: ['stats'],
     queryFn: async () => {
-      const response = await axios.get(\`\${API_URL}/dashboard/stats\`, axiosConfig);
+      const response = await axios.get(`${API_URL}/dashboard/stats`, axiosConfig);
       return response.data;
     },
     refetchInterval: 30000,
@@ -121,7 +121,7 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
   const { data: products } = useQuery<Product[]>({
     queryKey: ['products'],
     queryFn: async () => {
-      const response = await axios.get(\`\${API_URL}/products\`, axiosConfig);
+      const response = await axios.get(`${API_URL}/products`, axiosConfig);
       return response.data;
     },
   });
@@ -173,12 +173,12 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
         </div>
       </nav>
 
-      <aside className={\`sidebar \${mobileMenuOpen ? 'mobile-open' : ''}\`}>
+      <aside className={`sidebar ${mobileMenuOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-content">
           {menuItems.map((item) => (
             <button
               key={item.id}
-              className={\`sidebar-item \${activeMenu === item.id ? 'active' : ''}\`}
+              className={`sidebar-item ${activeMenu === item.id ? 'active' : ''}`}
               onClick={() => {
                 setActiveMenu(item.id);
                 setMobileMenuOpen(false);
@@ -216,7 +216,7 @@ function HomeContent({ stats }: { stats?: Stats }) {
       <div className="stats-grid">
         <div className="stat-card">
           <div className="stat-label">Total sales today</div>
-          <div className="stat-value">\${stats?.monthlyRevenue?.toFixed(2) || '0.00'}</div>
+          <div className="stat-value">${stats?.monthlyRevenue?.toFixed(2) || '0.00'}</div>
           <div className="stat-change positive">↑ +12.5% from yesterday</div>
         </div>
         <div className="stat-card">
@@ -231,7 +231,7 @@ function HomeContent({ stats }: { stats?: Stats }) {
         </div>
         <div className="stat-card">
           <div className="stat-label">Lifetime revenue</div>
-          <div className="stat-value">\${stats?.totalRevenue?.toFixed(2) || '0.00'}</div>
+          <div className="stat-value">${stats?.totalRevenue?.toFixed(2) || '0.00'}</div>
           <div className="stat-change positive">↑ All time</div>
         </div>
       </div>
@@ -313,7 +313,7 @@ function ProductsContent({ products }: { products?: Product[] }) {
                   </td>
                   <td><span className="badge badge-success">Active</span></td>
                   <td>{product.stock} in stock</td>
-                  <td>\${product.price.toFixed(2)}</td>
+                  <td>${product.price.toFixed(2)}</td>
                   <td>
                     <button className="btn-icon">✏️</button>
                     <button className="btn-icon">🗑️</button>
@@ -381,7 +381,7 @@ function AnalyticsContent({ stats }: { stats?: Stats }) {
       <div className="stats-grid">
         <div className="stat-card">
           <div className="stat-label">Total revenue</div>
-          <div className="stat-value">\${stats?.totalRevenue?.toFixed(2) || '0.00'}</div>
+          <div className="stat-value">${stats?.totalRevenue?.toFixed(2) || '0.00'}</div>
         </div>
         <div className="stat-card">
           <div className="stat-label">Orders</div>
@@ -389,7 +389,7 @@ function AnalyticsContent({ stats }: { stats?: Stats }) {
         </div>
         <div className="stat-card">
           <div className="stat-label">Average order value</div>
-          <div className="stat-value">\${stats?.totalOrders ? (stats.totalRevenue / stats.totalOrders).toFixed(2) : '0.00'}</div>
+          <div className="stat-value">${stats?.totalOrders ? (stats.totalRevenue / stats.totalOrders).toFixed(2) : '0.00'}</div>
         </div>
         <div className="stat-card">
           <div className="stat-label">Conversion rate</div>
