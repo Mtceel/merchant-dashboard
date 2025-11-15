@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
       - name: merchant-dashboard
-        image: mtceel/merchant-dashboard:22c46e2
+        image: mtceel/merchant-dashboard:d50fc87
         ports:
         - containerPort: 80
         resources:
@@ -61,7 +61,7 @@ spec:
     spec:
       containers:
       - name: merchant-dashboard
-        image: mtceel/merchant-dashboard:22c46e2
+        image: mtceel/merchant-dashboard:d50fc87
         ports:
         - containerPort: 80
         resources:
