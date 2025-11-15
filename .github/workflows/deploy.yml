@@ -40,8 +40,7 @@ jobs:
       - name: Update Kubernetes manifest
         run: |
           # Update image tag in K8s manifests
-          sed -i "s|image: mtceel/merchant-dashboard:.*|image: mtceel/merchant-dashboard:${{ steps.vars.outputs.SHORT_SHA }}|" k8s/deployment-blue.yaml
-          sed -i "s|image: mtceel/merchant-dashboard:.*|image: mtceel/merchant-dashboard:${{ steps.vars.outputs.SHORT_SHA }}|" k8s/deployment-green.yaml
+          sed -i "s|image: mtceel/merchant-dashboard:.*|image: mtceel/merchant-dashboard:${{ steps.vars.outputs.SHORT_SHA }}|g" k8s/blue-green-deployment.yaml
           
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
