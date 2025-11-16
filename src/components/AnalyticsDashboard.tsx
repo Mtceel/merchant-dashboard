@@ -19,7 +19,7 @@ export function AnalyticsDashboard({ token, tenantId }: { token: string; tenantI
     queryKey: ['analytics-dashboard', tenantId],
     queryFn: async () => {
       const response = await axios.get(
-        `http://analytics-service.platform-services.svc.cluster.local/api/analytics/dashboard/${tenantId}`,
+        `/api/analytics/dashboard/${tenantId}`,
         axiosConfig
       );
       return response.data;
@@ -31,7 +31,7 @@ export function AnalyticsDashboard({ token, tenantId }: { token: string; tenantI
     queryKey: ['analytics-revenue', tenantId],
     queryFn: async () => {
       const response = await axios.get(
-        `http://analytics-service.platform-services.svc.cluster.local/api/analytics/revenue/${tenantId}?period=30d&interval=day`,
+        `/api/analytics/revenue/${tenantId}?period=30d&interval=day`,
         axiosConfig
       );
       return response.data;
@@ -43,7 +43,7 @@ export function AnalyticsDashboard({ token, tenantId }: { token: string; tenantI
     queryKey: ['analytics-products', tenantId],
     queryFn: async () => {
       const response = await axios.get(
-        `http://analytics-service.platform-services.svc.cluster.local/api/analytics/products/${tenantId}?limit=5`,
+        `/api/analytics/products/${tenantId}?limit=5`,
         axiosConfig
       );
       return response.data;
@@ -55,7 +55,7 @@ export function AnalyticsDashboard({ token, tenantId }: { token: string; tenantI
     queryKey: ['analytics-customers', tenantId],
     queryFn: async () => {
       const response = await axios.get(
-        `http://analytics-service.platform-services.svc.cluster.local/api/analytics/customers/${tenantId}?period=30d`,
+        `/api/analytics/customers/${tenantId}?period=30d`,
         axiosConfig
       );
       return response.data;

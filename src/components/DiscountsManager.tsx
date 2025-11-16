@@ -28,7 +28,7 @@ export function DiscountsManager({ token, tenantId }: { token: string; tenantId:
     queryKey: ['discounts', tenantId],
     queryFn: async () => {
       const response = await axios.get(
-        `http://discounts-service.platform-services.svc.cluster.local/api/discounts?tenant_id=${tenantId}`,
+        `/api/discounts?tenant_id=${tenantId}`,
         axiosConfig
       );
       return response.data;
@@ -39,7 +39,7 @@ export function DiscountsManager({ token, tenantId }: { token: string; tenantId:
   const createMutation = useMutation({
     mutationFn: async (data: Partial<Discount>) => {
       return axios.post(
-        'http://discounts-service.platform-services.svc.cluster.local/api/discounts',
+        '/api/discounts',
         { ...data, tenant_id: tenantId },
         axiosConfig
       );
@@ -53,7 +53,7 @@ export function DiscountsManager({ token, tenantId }: { token: string; tenantId:
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       return axios.put(
-        `http://discounts-service.platform-services.svc.cluster.local/api/discounts/${id}`,
+        `/api/discounts/${id}`,
         { tenant_id: tenantId, status },
         axiosConfig
       );
@@ -66,7 +66,7 @@ export function DiscountsManager({ token, tenantId }: { token: string; tenantId:
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       return axios.delete(
-        `http://discounts-service.platform-services.svc.cluster.local/api/discounts/${id}?tenant_id=${tenantId}`,
+        `/api/discounts/${id}?tenant_id=${tenantId}`,
         axiosConfig
       );
     },

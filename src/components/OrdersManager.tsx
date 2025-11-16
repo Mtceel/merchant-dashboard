@@ -29,7 +29,7 @@ export function OrdersManager({ token, tenantId }: { token: string; tenantId: st
       if (filterStatus !== 'all') params.append('status', filterStatus);
       
       const response = await axios.get(
-        `http://orders-service.platform-services.svc.cluster.local/api/orders?${params}`,
+        `/api/orders?${params}`,
         axiosConfig
       );
       return response.data;
@@ -40,7 +40,7 @@ export function OrdersManager({ token, tenantId }: { token: string; tenantId: st
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status, tracking_number }: { id: string; status: string; tracking_number?: string }) => {
       return axios.put(
-        `http://orders-service.platform-services.svc.cluster.local/api/orders/${id}`,
+        `/api/orders/${id}`,
         { tenant_id: tenantId, status, tracking_number },
         axiosConfig
       );

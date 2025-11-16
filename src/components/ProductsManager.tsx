@@ -28,7 +28,7 @@ export function ProductsManager({ token, tenantId }: { token: string; tenantId: 
     queryKey: ['products', tenantId],
     queryFn: async () => {
       const response = await axios.get(
-        `http://products-service.platform-services.svc.cluster.local/api/products?tenant_id=${tenantId}`,
+        `/api/products?tenant_id=${tenantId}`,
         axiosConfig
       );
       return response.data;
@@ -39,7 +39,7 @@ export function ProductsManager({ token, tenantId }: { token: string; tenantId: 
   const createMutation = useMutation({
     mutationFn: async (data: Partial<Product>) => {
       return axios.post(
-        'http://products-service.platform-services.svc.cluster.local/api/products',
+        '/api/products',
         { ...data, tenant_id: tenantId },
         axiosConfig
       );
@@ -53,7 +53,7 @@ export function ProductsManager({ token, tenantId }: { token: string; tenantId: 
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...data }: Partial<Product> & { id: string }) => {
       return axios.put(
-        `http://products-service.platform-services.svc.cluster.local/api/products/${id}`,
+        `/api/products/${id}`,
         { ...data, tenant_id: tenantId },
         axiosConfig
       );
@@ -67,7 +67,7 @@ export function ProductsManager({ token, tenantId }: { token: string; tenantId: 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       return axios.delete(
-        `http://products-service.platform-services.svc.cluster.local/api/products/${id}?tenant_id=${tenantId}`,
+        `/api/products/${id}?tenant_id=${tenantId}`,
         axiosConfig
       );
     },

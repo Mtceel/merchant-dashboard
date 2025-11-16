@@ -26,7 +26,7 @@ export function CustomersManager({ token, tenantId }: { token: string; tenantId:
       if (searchTerm) params.append('search', searchTerm);
       
       const response = await axios.get(
-        `http://customers-service.platform-services.svc.cluster.local/api/customers?${params}`,
+        `/api/customers?${params}`,
         axiosConfig
       );
       return response.data;
