@@ -6,7 +6,8 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { Plus, Edit, Trash2, Eye, Globe } from 'lucide-react';
-import { PageBuilder } from './PageBuilder';
+import { VisualPageEditor } from './VisualPageEditor';
+import './VisualPageEditor.css';
 import './PagesList.css';
 
 const API_URL = '/api';
@@ -46,17 +47,18 @@ export function PagesList() {
 
   if (editingPageId !== null) {
     return (
-      <PageBuilder
+      <VisualPageEditor
         pageId={editingPageId}
-        onBack={() => setEditingPageId(null)}
+        onClose={() => setEditingPageId(null)}
       />
     );
   }
 
   if (isCreating) {
     return (
-      <PageBuilder
-        onBack={() => setIsCreating(false)}
+      <VisualPageEditor
+        pageId={0}
+        onClose={() => setIsCreating(false)}
       />
     );
   }
