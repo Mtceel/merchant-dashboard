@@ -515,7 +515,8 @@ function AppsContent() {
 }
 
 function OnlineStoreContent({ user }: { user?: { subdomain?: string; email?: string } }) {
-  const [activeSection, setActiveSection] = useState<'overview' | 'pages' | 'themes'>('overview');
+  type SectionType = 'overview' | 'pages' | 'themes';
+  const [activeSection, setActiveSection] = useState<SectionType>('overview');
   
   // Probeer eerst localStorage tenant data als fallback voor snelle render
   const getLocalTenantData = () => {
@@ -555,11 +556,6 @@ function OnlineStoreContent({ user }: { user?: { subdomain?: string; email?: str
     (user as any).storeName || localTenant?.storeName || 'Your Store' : 
     localTenant?.storeName || 'Your Store';
 
-  // Show Pages component when pages section is active
-  if (activeSection === 'pages') {
-    return <PagesList />;
-  }
-
   return (
     <div className="page-content">
       <div className="page-header">
@@ -588,6 +584,8 @@ function OnlineStoreContent({ user }: { user?: { subdomain?: string; email?: str
           🎨 Themes
         </button>
       </div>
+
+      {activeSection === 'pages' && <PagesList />}
 
       {activeSection === 'overview' && (
         <div className="dashboard-card">
