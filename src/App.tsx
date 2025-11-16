@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import { PagesList } from './components/PageBuilder/PagesList';
 import './App.css';
 
 const queryClient = new QueryClient();
@@ -26,7 +27,7 @@ interface Product {
   stock: number;
 }
 
-type MenuItem = 'home' | 'orders' | 'products' | 'customers' | 'analytics' | 'marketing' | 'discounts' | 'apps' | 'online-store' | 'settings';
+type MenuItem = 'home' | 'orders' | 'products' | 'customers' | 'analytics' | 'marketing' | 'discounts' | 'apps' | 'online-store' | 'pages' | 'settings';
 
 const menuItems: { id: MenuItem; label: string; icon: string }[] = [
   { id: 'home', label: 'Home', icon: '🏠' },
@@ -38,6 +39,7 @@ const menuItems: { id: MenuItem; label: string; icon: string }[] = [
   { id: 'discounts', label: 'Discounts', icon: '🏷️' },
   { id: 'apps', label: 'Apps', icon: '🧩' },
   { id: 'online-store', label: 'Online Store', icon: '🌐' },
+  { id: 'pages', label: 'Pages', icon: '📄' },
   { id: 'settings', label: 'Settings', icon: '⚙️' },
 ];
 
@@ -185,6 +187,8 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
         return <AppsContent />;
       case 'online-store':
         return <OnlineStoreContent user={user} />;
+      case 'pages':
+        return <PagesList />;
       case 'settings':
         return <SettingsContent />;
       default:
