@@ -2,6 +2,11 @@ import { useState } from 'react';
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { PagesList } from './components/PageBuilder/PagesList';
+import { ProductsManager } from './components/ProductsManager';
+import { OrdersManager } from './components/OrdersManager';
+import { CustomersManager } from './components/CustomersManager';
+import { DiscountsManager } from './components/DiscountsManager';
+import { AnalyticsDashboard } from './components/AnalyticsDashboard';
 import './App.css';
 
 const queryClient = new QueryClient();
@@ -18,13 +23,6 @@ interface Stats {
   totalOrders: number;
   totalRevenue: number;
   monthlyRevenue: number;
-}
-
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  stock: number;
 }
 
 type MenuItem = 'home' | 'orders' | 'products' | 'customers' | 'analytics' | 'marketing' | 'discounts' | 'apps' | 'online-store' | 'settings';
@@ -158,30 +156,34 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
     refetchInterval: 30000,
   });
 
-  const { data: products } = useQuery<Product[]>({
-    queryKey: ['products'],
-    queryFn: async () => {
-      const response = await axios.get(`${API_URL}/products`, axiosConfig);
-      return response.data;
-    },
-  });
+  // Get tenant ID from localStorage or user data
+  const getTenantId = () => {
+    const tenant = localStorage.getItem('merchant_tenant');
+    if (tenant) {
+      const tenantData = JSON.parse(tenant);
+      return tenantData.id || user?.tenantId || '1';
+    }
+    return user?.tenantId || '1';
+  };
+
+  const tenantId = getTenantId();
 
   const renderContent = () => {
     switch (activeMenu) {
       case 'home':
         return <HomeContent stats={stats} />;
       case 'products':
-        return <ProductsContent products={products} />;
+        return <ProductsManager token={token} tenantId={tenantId} />;
       case 'orders':
-        return <OrdersContent />;
+        return <OrdersManager token={token} tenantId={tenantId} />;
       case 'customers':
-        return <CustomersContent />;
+        return <CustomersManager token={token} tenantId={tenantId} />;
       case 'analytics':
-        return <AnalyticsContent stats={stats} />;
+        return <AnalyticsDashboard token={token} tenantId={tenantId} />;
       case 'marketing':
         return <MarketingContent />;
       case 'discounts':
-        return <DiscountsContent />;
+        return <DiscountsManager token={token} tenantId={tenantId} />;
       case 'apps':
         return <AppsContent />;
       case 'online-store':
@@ -312,145 +314,6 @@ function HomeContent({ stats }: { stats?: Stats }) {
   );
 }
 
-function ProductsContent({ products }: { products?: Product[] }) {
-  return (
-    <div className="page-content">
-      <div className="page-header">
-        <h1>Products</h1>
-        <button className="btn-primary">Add product</button>
-      </div>
-
-      <div className="search-bar">
-        <input type="text" placeholder="Search products..." />
-        <button className="btn-secondary">Filter</button>
-      </div>
-
-      {products && products.length > 0 ? (
-        <div className="table-card">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th><input type="checkbox" /></th>
-                <th>Product</th>
-                <th>Status</th>
-                <th>Inventory</th>
-                <th>Price</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((product) => (
-                <tr key={product.id}>
-                  <td><input type="checkbox" /></td>
-                  <td>
-                    <div className="product-cell">
-                      <div className="product-image">🏷️</div>
-                      <div>
-                        <div className="product-name">{product.name}</div>
-                        <div className="product-sku">SKU: {product.id}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td><span className="badge badge-success">Active</span></td>
-                  <td>{product.stock} in stock</td>
-                  <td>${product.price.toFixed(2)}</td>
-                  <td>
-                    <button className="btn-icon">✏️</button>
-                    <button className="btn-icon">🗑️</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <div className="empty-state">
-          <div className="empty-icon">📦</div>
-          <h3>Add your products</h3>
-          <p>Start by stocking your store with products your customers will love</p>
-          <button className="btn-primary">Add product</button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function OrdersContent() {
-  return (
-    <div className="page-content">
-      <div className="page-header">
-        <h1>Orders</h1>
-        <button className="btn-primary">Create order</button>
-      </div>
-      <div className="empty-state">
-        <div className="empty-icon">📦</div>
-        <h3>No orders yet</h3>
-        <p>When customers place orders, they'll appear here</p>
-      </div>
-    </div>
-  );
-}
-
-function CustomersContent() {
-  return (
-    <div className="page-content">
-      <div className="page-header">
-        <h1>Customers</h1>
-        <button className="btn-primary">Add customer</button>
-      </div>
-      <div className="empty-state">
-        <div className="empty-icon">👥</div>
-        <h3>No customers yet</h3>
-        <p>Start building your customer base</p>
-      </div>
-    </div>
-  );
-}
-
-function AnalyticsContent({ stats }: { stats?: Stats }) {
-  return (
-    <div className="page-content">
-      <div className="page-header">
-        <h1>Analytics</h1>
-        <select className="btn-secondary">
-          <option>Last 7 days</option>
-          <option>Last 30 days</option>
-        </select>
-      </div>
-      
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-label">Total revenue</div>
-          <div className="stat-value">${stats?.totalRevenue?.toFixed(2) || '0.00'}</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-label">Orders</div>
-          <div className="stat-value">{stats?.totalOrders || 0}</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-label">Average order value</div>
-          <div className="stat-value">${stats?.totalOrders ? (stats.totalRevenue / stats.totalOrders).toFixed(2) : '0.00'}</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-label">Conversion rate</div>
-          <div className="stat-value">2.4%</div>
-        </div>
-      </div>
-
-      <div className="dashboard-card">
-        <div className="card-header">
-          <h3>📊 Revenue over time</h3>
-        </div>
-        <div className="card-body">
-          <div className="chart-placeholder">
-            <p>📈 Analytics charts coming soon</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function MarketingContent() {
   return (
     <div className="page-content">
@@ -462,22 +325,6 @@ function MarketingContent() {
         <div className="empty-icon">📢</div>
         <h3>Start your marketing campaigns</h3>
         <p>Reach more customers with email, social, and ads</p>
-      </div>
-    </div>
-  );
-}
-
-function DiscountsContent() {
-  return (
-    <div className="page-content">
-      <div className="page-header">
-        <h1>Discounts</h1>
-        <button className="btn-primary">Create discount</button>
-      </div>
-      <div className="empty-state">
-        <div className="empty-icon">🏷️</div>
-        <h3>Create discount codes</h3>
-        <p>Offer discounts to increase sales and reward customers</p>
       </div>
     </div>
   );
