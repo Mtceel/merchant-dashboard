@@ -658,6 +658,38 @@ body {
   margin-top: 12px;
 }
 
+/* Online Store Tabs */
+.online-store-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #e1e3e5;
+  padding-bottom: 0;
+}
+
+.tab-button {
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #6d7175;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: -1px;
+}
+
+.tab-button:hover {
+  color: #202223;
+  background-color: #f6f6f7;
+}
+
+.tab-button.active {
+  color: #008060;
+  border-bottom-color: #008060;
+}
+
 /* Mobile Overlay */
 .mobile-overlay {
   display: none;

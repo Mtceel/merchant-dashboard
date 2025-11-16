@@ -9,7 +9,7 @@ import { Plus, Edit, Trash2, Eye, Globe } from 'lucide-react';
 import { PageBuilder } from './PageBuilder';
 import './PagesList.css';
 
-const API_URL = 'https://api.fv-company.com';
+const API_URL = '/api';
 
 export function PagesList() {
   const [editingPageId, setEditingPageId] = useState<number | null>(null);

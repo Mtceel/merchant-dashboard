@@ -28,7 +28,7 @@ import { PagePreview } from './PagePreview';
 import { Save, Eye, EyeOff, Settings, ArrowLeft } from 'lucide-react';
 import './PageBuilder.css';
 
-const API_URL = 'https://api.fv-company.com';
+const API_URL = '/api';
 
 interface Block {
   id: string;

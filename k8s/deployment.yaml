@@ -56,6 +56,15 @@ spec:
   - host: dashboard.fv-company.com
     http:
       paths:
+      # API routes go to platform-api
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: platform-api
+            port:
+              number: 8080
+      # All other routes go to merchant dashboard
       - path: /
         pathType: Prefix
         backend:

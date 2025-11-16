@@ -27,7 +27,7 @@ interface Product {
   stock: number;
 }
 
-type MenuItem = 'home' | 'orders' | 'products' | 'customers' | 'analytics' | 'marketing' | 'discounts' | 'apps' | 'online-store' | 'pages' | 'settings';
+type MenuItem = 'home' | 'orders' | 'products' | 'customers' | 'analytics' | 'marketing' | 'discounts' | 'apps' | 'online-store' | 'settings';
 
 const menuItems: { id: MenuItem; label: string; icon: string }[] = [
   { id: 'home', label: 'Home', icon: '🏠' },
@@ -39,7 +39,6 @@ const menuItems: { id: MenuItem; label: string; icon: string }[] = [
   { id: 'discounts', label: 'Discounts', icon: '🏷️' },
   { id: 'apps', label: 'Apps', icon: '🧩' },
   { id: 'online-store', label: 'Online Store', icon: '🌐' },
-  { id: 'pages', label: 'Pages', icon: '📄' },
   { id: 'settings', label: 'Settings', icon: '⚙️' },
 ];
 
@@ -187,8 +186,6 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
         return <AppsContent />;
       case 'online-store':
         return <OnlineStoreContent user={user} />;
-      case 'pages':
-        return <PagesList />;
       case 'settings':
         return <SettingsContent />;
       default:
@@ -518,6 +515,8 @@ function AppsContent() {
 }
 
 function OnlineStoreContent({ user }: { user?: { subdomain?: string; email?: string } }) {
+  const [activeSection, setActiveSection] = useState<'overview' | 'pages' | 'themes'>('overview');
+  
   // Probeer eerst localStorage tenant data als fallback voor snelle render
   const getLocalTenantData = () => {
     try {
@@ -556,29 +555,67 @@ function OnlineStoreContent({ user }: { user?: { subdomain?: string; email?: str
     (user as any).storeName || localTenant?.storeName || 'Your Store' : 
     localTenant?.storeName || 'Your Store';
 
+  // Show Pages component when pages section is active
+  if (activeSection === 'pages') {
+    return <PagesList />;
+  }
+
   return (
     <div className="page-content">
       <div className="page-header">
         <h1>Online Store</h1>
-        <button className="btn-primary">Customize theme</button>
+        <a href={storeUrl} target="_blank" rel="noopener noreferrer" className="btn-primary">View store</a>
       </div>
 
-      <div className="dashboard-card">
-        <div className="card-header">
-          <h3>🌐 {storeName}</h3>
-        </div>
-        <div className="card-body">
-          <div className="store-preview">
-            <p><strong>Store URL:</strong> {storeUrl}</p>
-            <p><strong>Theme:</strong> Default Theme</p>
-            <p><strong>Status:</strong> <span className="badge badge-success">Published</span></p>
-            <div className="store-actions">
-              <a href={storeUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary">View store</a>
-              <button className="btn-secondary">Customize</button>
+      {/* Submenu for Online Store sections */}
+      <div className="online-store-tabs">
+        <button 
+          className={`tab-button ${activeSection === 'overview' ? 'active' : ''}`}
+          onClick={() => setActiveSection('overview')}
+        >
+          🏠 Overview
+        </button>
+        <button 
+          className={`tab-button ${activeSection === 'pages' ? 'active' : ''}`}
+          onClick={() => setActiveSection('pages')}
+        >
+          📄 Pages
+        </button>
+        <button 
+          className={`tab-button ${activeSection === 'themes' ? 'active' : ''}`}
+          onClick={() => setActiveSection('themes')}
+        >
+          🎨 Themes
+        </button>
+      </div>
+
+      {activeSection === 'overview' && (
+        <div className="dashboard-card">
+          <div className="card-header">
+            <h3>🌐 {storeName}</h3>
+          </div>
+          <div className="card-body">
+            <div className="store-preview">
+              <p><strong>Store URL:</strong> {storeUrl}</p>
+              <p><strong>Theme:</strong> Default Theme</p>
+              <p><strong>Status:</strong> <span className="badge badge-success">Published</span></p>
+              <div className="store-actions">
+                <a href={storeUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary">View store</a>
+                <button className="btn-secondary" onClick={() => setActiveSection('themes')}>Customize theme</button>
+                <button className="btn-secondary" onClick={() => setActiveSection('pages')}>Manage pages</button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {activeSection === 'themes' && (
+        <div className="empty-state">
+          <div className="empty-icon">🎨</div>
+          <h3>Theme customization</h3>
+          <p>Theme editor coming soon</p>
+        </div>
+      )}
     </div>
   );
 }
