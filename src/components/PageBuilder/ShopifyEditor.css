@@ -1,0 +1,396 @@
+/* Shopify-Style Editor - Split Screen Layout */
+
+.shopify-editor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #f1f2f4;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+}
+
+/* Header (like Shopify) */
+.editor-header {
+  height: 64px;
+  background: #fff;
+  border-bottom: 1px solid #e1e3e5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.05);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.back-btn {
+  padding: 8px 12px;
+  border: 1px solid #c9cccf;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #202223;
+  transition: all 0.15s;
+}
+
+.back-btn:hover {
+  background: #f6f6f7;
+}
+
+.page-title input {
+  font-size: 20px;
+  font-weight: 600;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #202223;
+  min-width: 300px;
+}
+
+.save-btn {
+  padding: 10px 20px;
+  background: #008060;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.15s;
+}
+
+.save-btn:hover {
+  background: #006e52;
+}
+
+.save-btn:disabled {
+  background: #b5b5b5;
+  cursor: not-allowed;
+}
+
+/* Layout */
+.editor-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Preview Panel (Left - 70%) */
+.preview-panel {
+  flex: 1;
+  overflow-y: auto;
+  background: #f1f2f4;
+  padding: 40px;
+  display: flex;
+  justify-content: center;
+}
+
+.preview-content {
+  width: 100%;
+  max-width: 1200px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.08);
+  border-radius: 8px;
+  overflow: hidden;
+  min-height: 80vh;
+}
+
+.empty-preview {
+  padding: 100px 40px;
+  text-align: center;
+  color: #6d7175;
+}
+
+.empty-preview h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #202223;
+  margin-bottom: 8px;
+}
+
+.empty-preview p {
+  font-size: 14px;
+}
+
+/* Block Wrapper */
+.block-wrapper {
+  position: relative;
+}
+
+.block-preview {
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+}
+
+.block-preview:hover {
+  outline: 2px dashed #008060;
+  outline-offset: 4px;
+}
+
+.block-preview.selected {
+  outline: 3px solid #008060;
+  outline-offset: 4px;
+}
+
+/* Settings Panel (Right - 30%) */
+.settings-panel {
+  width: 380px;
+  background: #fff;
+  border-left: 1px solid #e1e3e5;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.settings-tabs {
+  display: flex;
+  border-bottom: 1px solid #e1e3e5;
+  background: #fafbfb;
+}
+
+.settings-tabs button {
+  flex: 1;
+  padding: 14px 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6d7175;
+  transition: all 0.15s;
+  border-bottom: 2px solid transparent;
+}
+
+.settings-tabs button.active {
+  color: #202223;
+  background: #fff;
+  border-bottom: 2px solid #008060;
+}
+
+.settings-tabs button:hover:not(.active) {
+  color: #202223;
+  background: #f6f6f7;
+}
+
+.settings-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+/* Sections List */
+.sections-list h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #202223;
+  margin-bottom: 16px;
+}
+
+.section-category {
+  margin-bottom: 24px;
+}
+
+.section-category h4 {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #6d7175;
+  font-weight: 600;
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.section-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f6f6f7;
+  border: 1px solid #e1e3e5;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.section-item:hover {
+  background: #008060;
+  color: #fff;
+  border-color: #008060;
+  transform: translateX(4px);
+}
+
+.section-icon {
+  font-size: 24px;
+}
+
+.section-name {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* Block Settings */
+.block-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e1e3e5;
+}
+
+.settings-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: capitalize;
+  color: #202223;
+}
+
+.settings-header button {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #c9cccf;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 20px;
+  color: #6d7175;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.settings-header button:hover {
+  background: #f6f6f7;
+}
+
+.settings-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-actions button {
+  padding: 10px;
+  border: 1px solid #c9cccf;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  transition: all 0.15s;
+}
+
+.settings-actions button:hover {
+  background: #f6f6f7;
+}
+
+.settings-actions .delete-btn {
+  color: #d72c0d;
+  border-color: #d72c0d;
+}
+
+.settings-actions .delete-btn:hover {
+  background: #fef3f2;
+}
+
+.settings-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #202223;
+  text-transform: capitalize;
+}
+
+.field input[type="text"],
+.field input[type="number"] {
+  padding: 8px 12px;
+  border: 1px solid #c9cccf;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.15s;
+}
+
+.field input[type="text"]:focus,
+.field input[type="number"]:focus {
+  outline: none;
+  border-color: #008060;
+  box-shadow: 0 0 0 3px rgba(0, 128, 96, 0.1);
+}
+
+.field input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin-left: 8px;
+  cursor: pointer;
+}
+
+/* Theme & Page Settings */
+.theme-settings,
+.page-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.theme-settings h3,
+.page-settings h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #202223;
+  margin-bottom: 8px;
+}
+
+.theme-settings p {
+  font-size: 14px;
+  color: #6d7175;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .settings-panel {
+    width: 320px;
+  }
+}
+
+@media (max-width: 900px) {
+  .editor-layout {
+    flex-direction: column;
+  }
+  
+  .preview-panel {
+    min-height: 50vh;
+  }
+  
+  .settings-panel {
+    width: 100%;
+    max-height: 50vh;
+  }
+}

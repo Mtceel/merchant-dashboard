@@ -6,8 +6,8 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { Plus, Edit, Trash2, Eye, Globe } from 'lucide-react';
-import { VisualPageEditor } from './VisualPageEditor';
-import './VisualPageEditor.css';
+import { ShopifyEditor } from './ShopifyEditor';
+import './ShopifyEditor.css';
 import './PagesList.css';
 
 const API_URL = '/api';
@@ -26,7 +26,7 @@ export function PagesList() {
   const { data: pagesData, isLoading } = useQuery({
     queryKey: ['pages'],
     queryFn: async () => {
-      const response = await axios.get(`${API_URL}/api/pages`, axiosConfig);
+      const response = await axios.get(`${API_URL}/pages`, axiosConfig);
       return response.data;
     },
   });
@@ -34,7 +34,7 @@ export function PagesList() {
   // Delete page mutation
   const deleteMutation = useMutation({
     mutationFn: async (pageId: number) => {
-      await axios.delete(`${API_URL}/api/pages/${pageId}`, axiosConfig);
+      await axios.delete(`${API_URL}/pages/${pageId}`, axiosConfig);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pages'] });
@@ -47,7 +47,7 @@ export function PagesList() {
 
   if (editingPageId !== null) {
     return (
-      <VisualPageEditor
+      <ShopifyEditor
         pageId={editingPageId}
         onClose={() => setEditingPageId(null)}
       />
@@ -56,7 +56,7 @@ export function PagesList() {
 
   if (isCreating) {
     return (
-      <VisualPageEditor
+      <ShopifyEditor
         pageId={0}
         onClose={() => setIsCreating(false)}
       />
