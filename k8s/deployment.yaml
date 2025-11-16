@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: merchant-dashboard
-        image: mtceel/merchant-dashboard:99b6b66
+        image: mtceel/merchant-dashboard:8eb35ac
         ports:
         - containerPort: 80
         resources:
