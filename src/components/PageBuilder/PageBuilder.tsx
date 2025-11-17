@@ -22,8 +22,6 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { BlockLibrary } from './BlockLibrary';
-import { blockTemplates } from './blockTemplates'; // Force import to prevent tree-shaking
-import { TEST_CONTENT } from '../../TEST_FILE';
 import { BlockCanvas } from './BlockCanvas';
 import { BlockEditor } from './BlockEditor';
 import { PagePreview } from './PagePreview';
@@ -55,11 +53,6 @@ export function PageBuilder({ pageId, onBack }: PageBuilderProps) {
     is_published: false,
   });
   const [showSettings, setShowSettings] = useState(false);
-  
-  // Debug: force blockTemplates to be included in bundle
-  if (typeof window !== 'undefined' && blockTemplates.length) {
-    console.log('PageBuilder: Templates loaded:', blockTemplates.length, TEST_CONTENT);
-  }
 
   const token = localStorage.getItem('merchant_token');
   const axiosConfig = {
