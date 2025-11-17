@@ -7,7 +7,11 @@ import { OrdersManager } from './components/OrdersManager';
 import { CustomersManager } from './components/CustomersManager';
 import { DiscountsManager } from './components/DiscountsManager';
 import { AnalyticsDashboard } from './components/AnalyticsDashboard';
+import { blockTemplates } from './components/PageBuilder/blockTemplates';
 import './App.css';
+
+// Ensure blockTemplates is included in bundle
+console.log('🚀 App loaded with', blockTemplates.length, 'block templates');
 
 const queryClient = new QueryClient();
 const API_URL = '/api';

@@ -1,0 +1,1 @@
+export const TEST_CONTENT = "THIS_IS_A_TEST_MARKER_12345";
