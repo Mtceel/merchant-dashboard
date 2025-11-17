@@ -77,14 +77,14 @@ export function PageBuilder({ pageId, onBack }: PageBuilderProps) {
     enabled: !!pageId,
   });
 
-  // Fetch block types
-  const { data: blockTypesData } = useQuery({
-    queryKey: ['block-types'],
-    queryFn: async () => {
-      const response = await axios.get(`${API_URL}/api/block-types`, axiosConfig);
-      return response.data;
-    },
-  });
+  // Fetch block types - no longer needed with templates
+  // const { data: blockTypesData } = useQuery({
+  //   queryKey: ['block-types'],
+  //   queryFn: async () => {
+  //     const response = await axios.get(`${API_URL}/api/block-types`, axiosConfig);
+  //     return response.data;
+  //   },
+  // });
 
   // Load page data
   useEffect(() => {
