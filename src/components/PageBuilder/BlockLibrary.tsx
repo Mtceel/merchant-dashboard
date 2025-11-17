@@ -17,6 +17,8 @@ export function BlockLibrary({ onAddBlock }: BlockLibraryProps) {
   );
   const [hoveredTemplate, setHoveredTemplate] = useState<string | null>(null);
 
+  console.log('BlockLibrary loaded with', blockTemplates.length, 'templates');
+
   // Filter templates based on search
   const filteredTemplates = searchQuery
     ? blockTemplates.filter(
@@ -40,7 +42,7 @@ export function BlockLibrary({ onAddBlock }: BlockLibraryProps) {
     <div className="block-library">
       <div className="library-header">
         <h3>Add Sections</h3>
-        <p className="library-subtitle">Choose from pre-built templates</p>
+        <p className="library-subtitle">Choose from pre-built block templates ({blockTemplates.length} available)</p>
       </div>
 
       {/* Search Bar */}
