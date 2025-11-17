@@ -6,8 +6,8 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { Plus, Edit, Trash2, Eye, Globe } from 'lucide-react';
-import { ShopifyEditor } from './ShopifyEditor';
-import './ShopifyEditor.css';
+import { PageBuilder } from './PageBuilder';
+import './PageBuilder.css';
 import './PagesList.css';
 
 const API_URL = '/api';
@@ -47,18 +47,18 @@ export function PagesList() {
 
   if (editingPageId !== null) {
     return (
-      <ShopifyEditor
+      <PageBuilder
         pageId={editingPageId}
-        onClose={() => setEditingPageId(null)}
+        onBack={() => setEditingPageId(null)}
       />
     );
   }
 
   if (isCreating) {
     return (
-      <ShopifyEditor
+      <PageBuilder
         pageId={0}
-        onClose={() => setIsCreating(false)}
+        onBack={() => setIsCreating(false)}
       />
     );
   }
