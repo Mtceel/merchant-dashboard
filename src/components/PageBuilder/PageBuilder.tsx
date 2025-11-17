@@ -308,10 +308,7 @@ export function PageBuilder({ pageId, onBack }: PageBuilderProps) {
       ) : (
         <div className="builder-content">
           {/* Block Library Sidebar */}
-          <BlockLibrary
-            blockTypes={blockTypesData?.byCategory || {}}
-            onAddBlock={handleAddBlock}
-          />
+          <BlockLibrary onAddBlock={handleAddBlock} />
 
           {/* Canvas */}
           <div className="builder-canvas-container">
