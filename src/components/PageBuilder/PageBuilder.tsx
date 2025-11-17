@@ -71,7 +71,7 @@ export function PageBuilder({ pageId, onBack }: PageBuilderProps) {
     queryKey: ['page', pageId],
     queryFn: async () => {
       if (!pageId) return null;
-      const response = await axios.get(`${API_URL}/api/pages/${pageId}`, axiosConfig);
+      const response = await axios.get(`${API_URL}/pages/${pageId}`, axiosConfig);
       return response.data;
     },
     enabled: !!pageId,
@@ -108,9 +108,9 @@ export function PageBuilder({ pageId, onBack }: PageBuilderProps) {
       };
 
       if (pageId) {
-        return axios.put(`${API_URL}/api/pages/${pageId}`, data, axiosConfig);
+        return axios.put(`${API_URL}/pages/${pageId}`, data, axiosConfig);
       } else {
-        return axios.post(`${API_URL}/api/pages`, data, axiosConfig);
+        return axios.post(`${API_URL}/pages`, data, axiosConfig);
       }
     },
     onSuccess: () => {
@@ -126,7 +126,7 @@ export function PageBuilder({ pageId, onBack }: PageBuilderProps) {
   const previewMutation = useMutation({
     mutationFn: async () => {
       const response = await axios.post(
-        `${API_URL}/api/pages/render`,
+        `${API_URL}/pages/render`,
         { blocks },
         axiosConfig
       );
