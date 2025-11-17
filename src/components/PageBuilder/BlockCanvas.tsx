@@ -167,13 +167,137 @@ function renderBlockPreview(block: Block): React.ReactElement {
       );
 
     case 'product-grid':
+    case 'products-grid':
       return (
         <div className="preview-product-grid">
+          <h4>{config.heading || 'Products'}</h4>
+          <div className="product-grid-layout">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="product-placeholder">
+                <div className="product-image" />
+                <p>Product {i}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    
+    case 'products-carousel':
+      return (
+        <div className="preview-product-grid">
+          <h4>{config.heading || 'Best Sellers'}</h4>
           <div className="product-grid-layout">
             {[1, 2, 3].map((i) => (
               <div key={i} className="product-placeholder">
                 <div className="product-image" />
                 <p>Product {i}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    
+    case 'email-signup':
+    case 'email-popup':
+      return (
+        <div className="preview-cta">
+          <h3>{config.heading || 'Join Our Newsletter'}</h3>
+          <p>{config.subheading || 'Subscribe for updates'}</p>
+          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+            <input type="email" placeholder="Enter your email" style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }} />
+            <button>{config.buttonText || 'Subscribe'}</button>
+          </div>
+        </div>
+      );
+    
+    case 'text-image':
+    case 'text-image-multi':
+      return (
+        <div className="preview-two-column">
+          <div className="column-left">
+            <div className="image-placeholder" />
+          </div>
+          <div className="column-right">
+            <h4>{config.heading || 'Our Story'}</h4>
+            <p>{config.text?.substring(0, 100) || 'Content goes here...'}</p>
+          </div>
+        </div>
+      );
+    
+    case 'faq':
+      return (
+        <div className="preview-text">
+          <h4>{config.heading || 'FAQ'}</h4>
+          {config.items?.slice(0, 3).map((item: any, i: number) => (
+            <div key={i} style={{ padding: '8px 0', borderBottom: '1px solid #eee' }}>
+              <strong>{item.question}</strong>
+            </div>
+          ))}
+        </div>
+      );
+    
+    case 'blog-grid':
+    case 'blog-featured':
+      return (
+        <div className="preview-product-grid">
+          <h4>{config.heading || 'Latest Posts'}</h4>
+          <div className="product-grid-layout">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="product-placeholder">
+                <div className="product-image" />
+                <p>Blog Post {i}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    
+    case 'features':
+      return (
+        <div className="preview-text">
+          <h4>{config.heading || 'Features'}</h4>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+            {config.items?.slice(0, 3).map((item: any, i: number) => (
+              <div key={i} style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '2rem' }}>{item.icon}</div>
+                <strong>{item.heading}</strong>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    
+    case 'testimonials':
+      return (
+        <div className="preview-text">
+          <h4>{config.heading || 'Testimonials'}</h4>
+          {config.items?.slice(0, 2).map((item: any, i: number) => (
+            <div key={i} style={{ padding: '12px', background: '#f9f9f9', margin: '8px 0', borderRadius: '4px' }}>
+              <p>"{item.text}"</p>
+              <strong>— {item.author}</strong>
+            </div>
+          ))}
+        </div>
+      );
+    
+    case 'cta':
+      return (
+        <div className="preview-cta">
+          <h3>{config.heading || 'Ready to Get Started?'}</h3>
+          <p>{config.text || 'Join us today'}</p>
+          <button>{config.buttons?.[0]?.text || 'Get Started'}</button>
+        </div>
+      );
+    
+    case 'collection-list':
+      return (
+        <div className="preview-product-grid">
+          <h4>{config.heading || 'Collections'}</h4>
+          <div className="product-grid-layout">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="product-placeholder">
+                <div className="product-image" />
+                <p>Collection {i}</p>
               </div>
             ))}
           </div>
