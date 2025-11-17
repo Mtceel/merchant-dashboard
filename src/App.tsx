@@ -8,6 +8,7 @@ import { CustomersManager } from './components/CustomersManager';
 import { DiscountsManager } from './components/DiscountsManager';
 import { AnalyticsDashboard } from './components/AnalyticsDashboard';
 import { blockTemplates } from './components/PageBuilder/blockTemplates';
+import './components/PageBuilder/BlockLibrary'; // Force BlockLibrary to be included
 import './App.css';
 
 // Ensure blockTemplates is included in bundle

@@ -1,10 +1,16 @@
 /**
  * Enhanced Block Library - Shopify-style with templates and search
+ * Version: 2.0 with template categories
  */
 
 import { useState } from 'react';
 import { Plus, Search, ChevronDown, ChevronRight } from 'lucide-react';
 import { blockTemplates, blockTemplatesByCategory, templateCategories } from './blockTemplates';
+
+// Side-effect to ensure this version is loaded
+if (typeof window !== 'undefined') {
+  (window as any).__BLOCK_LIBRARY_V2__ = true;
+}
 
 interface BlockLibraryProps {
   onAddBlock: (blockType: string, defaultConfig: Record<string, any>) => void;
