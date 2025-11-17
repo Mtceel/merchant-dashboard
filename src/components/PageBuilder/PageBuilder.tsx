@@ -89,7 +89,23 @@ export function PageBuilder({ pageId, onBack }: PageBuilderProps) {
   // Load page data
   useEffect(() => {
     if (page) {
-      setBlocks(page.blocks || []);
+      // Parse content JSON string to blocks array
+      let blocksData = [];
+      if (page.content) {
+        try {
+          blocksData = typeof page.content === 'string' 
+            ? JSON.parse(page.content) 
+            : page.content;
+        } catch (e) {
+          console.error('Failed to parse page content:', e);
+          blocksData = [];
+        }
+      } else if (page.blocks) {
+        // Fallback for old data structure
+        blocksData = page.blocks;
+      }
+      
+      setBlocks(blocksData);
       setPageSettings({
         slug: page.slug,
         title: page.title,
@@ -104,7 +120,7 @@ export function PageBuilder({ pageId, onBack }: PageBuilderProps) {
     mutationFn: async () => {
       const data = {
         ...pageSettings,
-        blocks,
+        content: JSON.stringify(blocks), // API expects 'content' as JSON string
       };
 
       if (pageId) {
