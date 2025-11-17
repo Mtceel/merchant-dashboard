@@ -8,12 +8,16 @@ import { CustomersManager } from './components/CustomersManager';
 import { DiscountsManager } from './components/DiscountsManager';
 import { AnalyticsDashboard } from './components/AnalyticsDashboard';
 import { blockTemplates } from './components/PageBuilder/blockTemplates';
-import './components/PageBuilder/BlockLibrary'; // Force BlockLibrary to be included
+import { BlockLibrary } from './components/PageBuilder/BlockLibrary'; // Force BlockLibrary to be included
 import './components/PageBuilder/PageBuilder.css'; // Force CSS to be included
 import './App.css';
 
-// Ensure blockTemplates is included in bundle
+// Ensure blockTemplates and BlockLibrary are included in bundle
 console.log('🚀 App loaded with', blockTemplates.length, 'block templates');
+// Reference BlockLibrary to prevent tree-shaking
+if (typeof window !== 'undefined') {
+  (window as any).__BLOCK_LIBRARY_COMPONENT__ = BlockLibrary;
+}
 
 const queryClient = new QueryClient();
 const API_URL = '/api';
