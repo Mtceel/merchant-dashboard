@@ -26,6 +26,8 @@ export function ShopifyStyleEditor() {
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [previewHtml, setPreviewHtml] = useState('');
+  const [previewKey, setPreviewKey] = useState(0);
   const queryClient = useQueryClient();
 
   // Fetch all pages
@@ -134,7 +136,27 @@ export function ShopifyStyleEditor() {
 
   const selectedBlock = blocks.find(b => b.id === selectedBlockId);
   const tenant = JSON.parse(localStorage.getItem('merchant_tenant') || '{}');
-  const previewUrl = `https://${tenant.subdomain || 'demo'}.fv-company.com/${selectedPage?.slug || ''}`;
+  
+  // Generate preview HTML from blocks (Shopify-style: render inline, no external iframe URL)
+  useEffect(() => {
+    // Regenerate preview when blocks change
+    const renderPreview = async () => {
+      try {
+        const response = await axios.post(`${API_URL.replace('/api', '')}/preview`, {
+          blocks,
+          tenantId: tenant.id
+        });
+        setPreviewHtml(response.data);
+        setPreviewKey(prev => prev + 1);
+      } catch (error) {
+        console.error('Preview render error:', error);
+      }
+    };
+    
+    if (blocks.length > 0) {
+      renderPreview();
+    }
+  }, [blocks, tenant.id]);
 
   return (
     <div className="shopify-editor">
@@ -158,8 +180,8 @@ export function ShopifyStyleEditor() {
           </select>
         </div>
         <div className="topbar-right">
-          <a href={previewUrl} target="_blank" rel="noopener noreferrer" className="btn-preview">
-            👁️ Preview
+          <a href={`https://${tenant.subdomain || 'demo'}.fv-company.com/${selectedPage?.slug || ''}`} target="_blank" rel="noopener noreferrer" className="btn-preview">
+            👁️ View Live
           </a>
           <button 
             className="btn-save" 
@@ -249,15 +271,17 @@ export function ShopifyStyleEditor() {
         <div className="editor-preview">
           {pageLoading ? (
             <div className="loading-preview">Loading preview...</div>
-          ) : selectedPage ? (
+          ) : selectedPage && blocks.length > 0 ? (
             <iframe 
-              src={previewUrl}
+              key={previewKey}
+              srcDoc={previewHtml}
+              sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
               className="preview-iframe"
               title="Page Preview"
             />
           ) : (
             <div className="no-page-selected">
-              <p>Select a page to start editing</p>
+              <p>{selectedPage ? 'Add blocks to see preview' : 'Select a page to start editing'}</p>
             </div>
           )}
         </div>
