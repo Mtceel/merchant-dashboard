@@ -148,9 +148,30 @@ export function ShopifyStyleEditor() {
         // POST to storefront-renderer service (via nginx proxy at /storefront)
         const response = await axios.post(`${API_URL}/storefront/preview`, {
           blocks,
-          tenantId: tenant.id
+          tenantId: tenant.id,
+          editable: true // Tell renderer to add data-block-id attributes
         });
-        setPreviewHtml(response.data);
+        
+        // Inject click handlers into preview HTML
+        let html = response.data;
+        
+        // Add script to handle clicks in preview
+        const clickScript = `
+          <script>
+            document.addEventListener('click', function(e) {
+              const blockEl = e.target.closest('[data-block-id]');
+              if (blockEl) {
+                e.preventDefault();
+                const blockId = blockEl.getAttribute('data-block-id');
+                window.parent.postMessage({ type: 'SELECT_BLOCK', blockId }, '*');
+              }
+            });
+          </script>
+        `;
+        
+        html = html.replace('</body>', clickScript + '</body>');
+        
+        setPreviewHtml(html);
         setPreviewKey(prev => prev + 1);
       } catch (error) {
         console.error('Preview render error:', error);
@@ -159,8 +180,22 @@ export function ShopifyStyleEditor() {
     
     if (blocks.length > 0) {
       renderPreview();
+    } else {
+      setPreviewHtml('');
     }
   }, [blocks, tenant.id]);
+
+  // Listen for block selection from preview iframe
+  useEffect(() => {
+    const handleMessage = (e: MessageEvent) => {
+      if (e.data.type === 'SELECT_BLOCK') {
+        setSelectedBlockId(e.data.blockId);
+      }
+    };
+    
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
 
   return (
     <div className="shopify-editor">
