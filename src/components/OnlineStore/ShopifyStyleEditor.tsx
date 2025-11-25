@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import './ShopifyStyleEditor.css';
@@ -31,7 +31,6 @@ export function ShopifyStyleEditor() {
   const [previewHtml, setPreviewHtml] = useState('');
   const [previewKey, setPreviewKey] = useState(0);
   const [viewportMode, setViewportMode] = useState<ViewportMode>('desktop');
-  const [uploadingImage, setUploadingImage] = useState(false);
   const queryClient = useQueryClient();
 
   // Fetch all pages
