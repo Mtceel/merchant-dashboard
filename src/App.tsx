@@ -449,7 +449,7 @@ function OnlineStoreContent({ user }: { user?: { subdomain?: string; email?: str
           </div>
 
           {/* Submenu for Online Store sections */}
-          <div className="online-store-tabs">bs">
+          <div className="online-store-tabs">
             <button 
               className={`tab-button ${activeSection === 'overview' ? 'active' : ''}`}
               onClick={() => setActiveSection('overview')}
