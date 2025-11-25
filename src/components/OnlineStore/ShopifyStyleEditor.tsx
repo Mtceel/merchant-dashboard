@@ -766,7 +766,7 @@ function getDefaultConfig(type: string): Record<string, any> {
       };
     case 'image':
       return {
-        imageUrl: 'https://via.placeholder.com/800x400',
+        imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=400&fit=crop',
         alt: 'Product image',
         link: ''
       };
