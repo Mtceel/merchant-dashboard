@@ -33,10 +33,10 @@ export function ShopifyStyleEditor() {
     queryKey: ['pages'],
     queryFn: async () => {
       const token = localStorage.getItem('merchant_token');
-      const response = await axios.get<Page[]>(`${API_URL}/pages`, {
+      const response = await axios.get<{pages: Page[]}>(`${API_URL}/pages`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      return response.data;
+      return response.data.pages || response.data;
     }
   });
 
