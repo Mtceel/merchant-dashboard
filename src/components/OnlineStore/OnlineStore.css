@@ -1,6 +1,8 @@
 /* Pages Manager */
 .pages-manager {
   padding: 0;
+  width: 100%;
+  max-width: 100%;
 }
 
 .pages-header {
@@ -83,6 +85,8 @@
 /* Navigation Manager */
 .navigation-manager {
   padding: 0;
+  width: 100%;
+  max-width: 100%;
 }
 
 .nav-header {
