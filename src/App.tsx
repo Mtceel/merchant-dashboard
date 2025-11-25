@@ -21,6 +21,23 @@ if (typeof window !== 'undefined') {
   (window as any).__BLOCK_LIBRARY_COMPONENT__ = BlockLibrary;
 }
 
+// Setup axios interceptor for 401 errors (auto-logout on invalid token)
+axios.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response?.status === 401) {
+      // Clear all auth data
+      localStorage.removeItem('token');
+      localStorage.removeItem('merchant_token');
+      localStorage.removeItem('merchant_user');
+      localStorage.removeItem('merchant_tenant');
+      // Reload to login page
+      window.location.href = '/';
+    }
+    return Promise.reject(error);
+  }
+);
+
 const queryClient = new QueryClient();
 const API_URL = '/api';
 
