@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { PagesList } from './components/PageBuilder/PagesList';
 import { ProductsManager } from './components/ProductsManager';
 import { OrdersManager } from './components/OrdersManager';
 import { CustomersManager } from './components/CustomersManager';

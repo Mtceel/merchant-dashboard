@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import './OnlineStore.css';
 
@@ -28,7 +28,6 @@ export function NavigationManager() {
   ]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newItem, setNewItem] = useState({ label: '', url: '', type: 'page' as 'page' | 'custom' | 'external' });
-  const queryClient = useQueryClient();
 
   const { data: pages } = useQuery({
     queryKey: ['pages'],
