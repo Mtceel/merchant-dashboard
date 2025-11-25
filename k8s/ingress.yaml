@@ -4,13 +4,9 @@ metadata:
   name: merchant-dashboard-react
   namespace: platform-services
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
   ingressClassName: nginx
-  tls:
-  - hosts:
-    - dashboard.fv-company.com
-    secretName: merchant-react-tls
   rules:
   - host: dashboard.fv-company.com
     http:
