@@ -441,42 +441,38 @@ function OnlineStoreContent({ user }: { user?: { subdomain?: string; email?: str
 
   return (
     <div className="page-content" style={{ maxWidth: activeSection === 'editor' ? 'none' : '1600px', padding: activeSection === 'editor' ? 0 : undefined }}>
-      {activeSection !== 'editor' && (
-        <>
-          <div className="page-header">
-            <h1>Online Store</h1>
-            <a href={storeUrl} target="_blank" rel="noopener noreferrer" className="btn-primary">View store</a>
-          </div>
+      <div className="page-header">
+        <h1>Online Store</h1>
+        <a href={storeUrl} target="_blank" rel="noopener noreferrer" className="btn-primary">View store</a>
+      </div>
 
-          {/* Submenu for Online Store sections */}
-          <div className="online-store-tabs">
-            <button 
-              className={`tab-button ${activeSection === 'overview' ? 'active' : ''}`}
-              onClick={() => setActiveSection('overview')}
-            >
-              🏠 Overview
-            </button>
-            <button 
-              className={`tab-button ${activeSection === 'editor' ? 'active' : ''}`}
-              onClick={() => setActiveSection('editor')}
-            >
-              ✏️ Editor
-            </button>
-            <button 
-              className={`tab-button ${activeSection === 'pages' ? 'active' : ''}`}
-              onClick={() => setActiveSection('pages')}
-            >
-              📄 Pages
-            </button>
-            <button 
-              className={`tab-button ${activeSection === 'navigation' ? 'active' : ''}`}
-              onClick={() => setActiveSection('navigation')}
-            >
-              🧭 Navigation
-            </button>
-          </div>
-        </>
-      )}
+      {/* Submenu for Online Store sections */}
+      <div className="online-store-tabs">
+        <button 
+          className={`tab-button ${activeSection === 'overview' ? 'active' : ''}`}
+          onClick={() => setActiveSection('overview')}
+        >
+          🏠 Overview
+        </button>
+        <button 
+          className={`tab-button ${activeSection === 'editor' ? 'active' : ''}`}
+          onClick={() => setActiveSection('editor')}
+        >
+          ✏️ Editor
+        </button>
+        <button 
+          className={`tab-button ${activeSection === 'pages' ? 'active' : ''}`}
+          onClick={() => setActiveSection('pages')}
+        >
+          📄 Pages
+        </button>
+        <button 
+          className={`tab-button ${activeSection === 'navigation' ? 'active' : ''}`}
+          onClick={() => setActiveSection('navigation')}
+        >
+          🧭 Navigation
+        </button>
+      </div>
 
       {activeSection === 'editor' && <ShopifyStyleEditor />}
       {activeSection === 'pages' && <PagesManager />}
