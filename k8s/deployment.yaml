@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: merchant-dashboard
-        image: mtceel/merchant-dashboard:0a12d33
+        image: mtceel/merchant-dashboard:350c901
         imagePullPolicy: Always
         ports:
         - containerPort: 80
