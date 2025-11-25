@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import './ShopifyStyleEditor.css';
 
 const API_URL = '/api';
+
+type ViewportMode = 'desktop' | 'tablet' | 'mobile';
 
 interface Block {
   id: string;
@@ -28,6 +30,8 @@ export function ShopifyStyleEditor() {
   const [isSaving, setIsSaving] = useState(false);
   const [previewHtml, setPreviewHtml] = useState('');
   const [previewKey, setPreviewKey] = useState(0);
+  const [viewportMode, setViewportMode] = useState<ViewportMode>('desktop');
+  const [uploadingImage, setUploadingImage] = useState(false);
   const queryClient = useQueryClient();
 
   // Fetch all pages
@@ -179,6 +183,31 @@ export function ShopifyStyleEditor() {
               </option>
             ))}
           </select>
+          
+          {/* Viewport Mode Switcher */}
+          <div className="viewport-switcher">
+            <button 
+              className={`viewport-btn ${viewportMode === 'mobile' ? 'active' : ''}`}
+              onClick={() => setViewportMode('mobile')}
+              title="Mobile (375px)"
+            >
+              📱
+            </button>
+            <button 
+              className={`viewport-btn ${viewportMode === 'tablet' ? 'active' : ''}`}
+              onClick={() => setViewportMode('tablet')}
+              title="Tablet (768px)"
+            >
+              📱
+            </button>
+            <button 
+              className={`viewport-btn ${viewportMode === 'desktop' ? 'active' : ''}`}
+              onClick={() => setViewportMode('desktop')}
+              title="Desktop (100%)"
+            >
+              🖥️
+            </button>
+          </div>
         </div>
         <div className="topbar-right">
           <a href={`https://${tenant.subdomain || 'demo'}.fv-company.com/${selectedPage?.slug || ''}`} target="_blank" rel="noopener noreferrer" className="btn-preview">
@@ -273,13 +302,15 @@ export function ShopifyStyleEditor() {
           {pageLoading ? (
             <div className="loading-preview">Loading preview...</div>
           ) : selectedPage && blocks.length > 0 && previewHtml ? (
-            <iframe 
-              key={previewKey}
-              srcDoc={previewHtml}
-              sandbox="allow-scripts"
-              className="preview-iframe"
-              title="Page Preview"
-            />
+            <div className={`preview-container viewport-${viewportMode}`}>
+              <iframe 
+                key={previewKey}
+                srcDoc={previewHtml}
+                sandbox="allow-scripts"
+                className="preview-iframe"
+                title="Page Preview"
+              />
+            </div>
           ) : (
             <div className="no-page-selected">
               <p>{selectedPage ? (blocks.length === 0 ? 'Add blocks to see preview' : 'Loading preview...') : 'Select a page to start editing'}</p>
@@ -314,8 +345,37 @@ export function ShopifyStyleEditor() {
 }
 
 function BlockSettings({ block, onChange }: { block: Block; onChange: (config: Record<string, any>) => void }) {
+  const [uploadingImage, setUploadingImage] = useState(false);
+  
   const updateField = (field: string, value: any) => {
     onChange({ ...block.config, [field]: value });
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const token = localStorage.getItem('merchant_token');
+      const response = await axios.post(`${API_URL}/upload`, formData, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      updateField(field, response.data.url);
+    } catch (error) {
+      console.error('Image upload failed:', error);
+      alert('Image upload failed. Using placeholder.');
+      updateField(field, 'https://via.placeholder.com/800x400');
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   switch (block.type) {
@@ -328,7 +388,25 @@ function BlockSettings({ block, onChange }: { block: Block; onChange: (config: R
               type="text"
               value={block.config.title || ''}
               onChange={(e) => updateField('title', e.target.value)}
+              placeholder="Welcome to our store"
             />
+          </div>
+          <div className="form-group">
+            <label>Title Color</label>
+            <div className="color-picker-group">
+              <input 
+                type="color"
+                value={block.config.titleColor || '#ffffff'}
+                onChange={(e) => updateField('titleColor', e.target.value)}
+              />
+              <input 
+                type="text"
+                value={block.config.titleColor || '#ffffff'}
+                onChange={(e) => updateField('titleColor', e.target.value)}
+                placeholder="#ffffff"
+                className="color-input"
+              />
+            </div>
           </div>
           <div className="form-group">
             <label>Subtitle</label>
@@ -336,7 +414,37 @@ function BlockSettings({ block, onChange }: { block: Block; onChange: (config: R
               type="text"
               value={block.config.subtitle || ''}
               onChange={(e) => updateField('subtitle', e.target.value)}
+              placeholder="Discover amazing products"
             />
+          </div>
+          <div className="form-group">
+            <label>Background Color</label>
+            <div className="color-picker-group">
+              <input 
+                type="color"
+                value={block.config.backgroundColor || '#4f46e5'}
+                onChange={(e) => updateField('backgroundColor', e.target.value)}
+              />
+              <input 
+                type="text"
+                value={block.config.backgroundColor || '#4f46e5'}
+                onChange={(e) => updateField('backgroundColor', e.target.value)}
+                placeholder="#4f46e5"
+                className="color-input"
+              />
+            </div>
+          </div>
+          <div className="form-group">
+            <label>Background Image</label>
+            <input 
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleImageUpload(e, 'backgroundImage')}
+              disabled={uploadingImage}
+            />
+            {block.config.backgroundImage && (
+              <img src={block.config.backgroundImage} alt="Background preview" className="image-preview" />
+            )}
           </div>
           <div className="form-group">
             <label>Button Text</label>
@@ -344,6 +452,7 @@ function BlockSettings({ block, onChange }: { block: Block; onChange: (config: R
               type="text"
               value={block.config.buttonText || ''}
               onChange={(e) => updateField('buttonText', e.target.value)}
+              placeholder="Shop Now"
             />
           </div>
           <div className="form-group">
@@ -352,7 +461,25 @@ function BlockSettings({ block, onChange }: { block: Block; onChange: (config: R
               type="text"
               value={block.config.buttonLink || ''}
               onChange={(e) => updateField('buttonLink', e.target.value)}
+              placeholder="/products"
             />
+          </div>
+          <div className="form-group">
+            <label>Button Color</label>
+            <div className="color-picker-group">
+              <input 
+                type="color"
+                value={block.config.buttonColor || '#ffffff'}
+                onChange={(e) => updateField('buttonColor', e.target.value)}
+              />
+              <input 
+                type="text"
+                value={block.config.buttonColor || '#ffffff'}
+                onChange={(e) => updateField('buttonColor', e.target.value)}
+                placeholder="#ffffff"
+                className="color-input"
+              />
+            </div>
           </div>
         </div>
       );
@@ -361,11 +488,206 @@ function BlockSettings({ block, onChange }: { block: Block; onChange: (config: R
       return (
         <div className="settings-form">
           <div className="form-group">
+            <label>Heading</label>
+            <input 
+              type="text"
+              value={block.config.heading || ''}
+              onChange={(e) => updateField('heading', e.target.value)}
+              placeholder="Section Heading"
+            />
+          </div>
+          <div className="form-group">
             <label>Content</label>
             <textarea 
               rows={6}
               value={block.config.content || ''}
               onChange={(e) => updateField('content', e.target.value)}
+              placeholder="Add your text here..."
+            />
+          </div>
+          <div className="form-group">
+            <label>Text Color</label>
+            <div className="color-picker-group">
+              <input 
+                type="color"
+                value={block.config.textColor || '#333333'}
+                onChange={(e) => updateField('textColor', e.target.value)}
+              />
+              <input 
+                type="text"
+                value={block.config.textColor || '#333333'}
+                onChange={(e) => updateField('textColor', e.target.value)}
+                placeholder="#333333"
+                className="color-input"
+              />
+            </div>
+          </div>
+          <div className="form-group">
+            <label>Background Color</label>
+            <div className="color-picker-group">
+              <input 
+                type="color"
+                value={block.config.backgroundColor || '#ffffff'}
+                onChange={(e) => updateField('backgroundColor', e.target.value)}
+              />
+              <input 
+                type="text"
+                value={block.config.backgroundColor || '#ffffff'}
+                onChange={(e) => updateField('backgroundColor', e.target.value)}
+                placeholder="#ffffff"
+                className="color-input"
+              />
+            </div>
+          </div>
+          <div className="form-group">
+            <label>Text Align</label>
+            <select 
+              value={block.config.textAlign || 'left'}
+              onChange={(e) => updateField('textAlign', e.target.value)}
+            >
+              <option value="left">Left</option>
+              <option value="center">Center</option>
+              <option value="right">Right</option>
+            </select>
+          </div>
+        </div>
+      );
+    
+    case 'image':
+      return (
+        <div className="settings-form">
+          <div className="form-group">
+            <label>Image</label>
+            <input 
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleImageUpload(e, 'imageUrl')}
+              disabled={uploadingImage}
+            />
+            {block.config.imageUrl && (
+              <img src={block.config.imageUrl} alt="Preview" className="image-preview" />
+            )}
+          </div>
+          <div className="form-group">
+            <label>Alt Text</label>
+            <input 
+              type="text"
+              value={block.config.alt || ''}
+              onChange={(e) => updateField('alt', e.target.value)}
+              placeholder="Image description"
+            />
+          </div>
+          <div className="form-group">
+            <label>Link (optional)</label>
+            <input 
+              type="text"
+              value={block.config.link || ''}
+              onChange={(e) => updateField('link', e.target.value)}
+              placeholder="https://..."
+            />
+          </div>
+        </div>
+      );
+    
+    case 'products':
+      return (
+        <div className="settings-form">
+          <div className="form-group">
+            <label>Heading</label>
+            <input 
+              type="text"
+              value={block.config.heading || 'Featured Products'}
+              onChange={(e) => updateField('heading', e.target.value)}
+            />
+          </div>
+          <div className="form-group">
+            <label>Number of Products</label>
+            <input 
+              type="number"
+              min="1"
+              max="12"
+              value={block.config.limit || 4}
+              onChange={(e) => updateField('limit', parseInt(e.target.value))}
+            />
+          </div>
+          <div className="form-group">
+            <label>Layout</label>
+            <select 
+              value={block.config.layout || 'grid'}
+              onChange={(e) => updateField('layout', e.target.value)}
+            >
+              <option value="grid">Grid</option>
+              <option value="carousel">Carousel</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label>Background Color</label>
+            <div className="color-picker-group">
+              <input 
+                type="color"
+                value={block.config.backgroundColor || '#f9fafb'}
+                onChange={(e) => updateField('backgroundColor', e.target.value)}
+              />
+              <input 
+                type="text"
+                value={block.config.backgroundColor || '#f9fafb'}
+                onChange={(e) => updateField('backgroundColor', e.target.value)}
+                placeholder="#f9fafb"
+                className="color-input"
+              />
+            </div>
+          </div>
+        </div>
+      );
+    
+    case 'video':
+      return (
+        <div className="settings-form">
+          <div className="form-group">
+            <label>Video URL (YouTube/Vimeo)</label>
+            <input 
+              type="text"
+              value={block.config.videoUrl || ''}
+              onChange={(e) => updateField('videoUrl', e.target.value)}
+              placeholder="https://www.youtube.com/watch?v=..."
+            />
+          </div>
+          <div className="form-group">
+            <label>Heading (optional)</label>
+            <input 
+              type="text"
+              value={block.config.heading || ''}
+              onChange={(e) => updateField('heading', e.target.value)}
+            />
+          </div>
+        </div>
+      );
+    
+    case 'gallery':
+      return (
+        <div className="settings-form">
+          <div className="form-group">
+            <label>Gallery Images</label>
+            <input 
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={(e) => {
+                // For now, just upload first image
+                handleImageUpload(e, 'images');
+              }}
+              disabled={uploadingImage}
+            />
+            <p className="help-text">Upload multiple images for gallery</p>
+          </div>
+          <div className="form-group">
+            <label>Columns</label>
+            <input 
+              type="number"
+              min="2"
+              max="6"
+              value={block.config.columns || 3}
+              onChange={(e) => updateField('columns', parseInt(e.target.value))}
             />
           </div>
         </div>
@@ -393,13 +715,43 @@ function getDefaultConfig(type: string): Record<string, any> {
     case 'hero':
       return {
         title: 'Welcome to our store',
+        titleColor: '#ffffff',
         subtitle: 'Discover amazing products',
+        backgroundColor: '#4f46e5',
         buttonText: 'Shop Now',
-        buttonLink: '/products'
+        buttonLink: '/products',
+        buttonColor: '#ffffff'
       };
     case 'text':
       return {
-        content: 'Add your text here...'
+        heading: 'About Us',
+        content: 'Add your text here...',
+        textColor: '#333333',
+        backgroundColor: '#ffffff',
+        textAlign: 'left'
+      };
+    case 'image':
+      return {
+        imageUrl: 'https://via.placeholder.com/800x400',
+        alt: 'Product image',
+        link: ''
+      };
+    case 'products':
+      return {
+        heading: 'Featured Products',
+        limit: 4,
+        layout: 'grid',
+        backgroundColor: '#f9fafb'
+      };
+    case 'video':
+      return {
+        videoUrl: '',
+        heading: 'Watch Our Story'
+      };
+    case 'gallery':
+      return {
+        images: [],
+        columns: 3
       };
     default:
       return {};
