@@ -7,6 +7,8 @@ import { OrdersManager } from './components/OrdersManager';
 import { CustomersManager } from './components/CustomersManager';
 import { DiscountsManager } from './components/DiscountsManager';
 import { AnalyticsDashboard } from './components/AnalyticsDashboard';
+import { PagesManager } from './components/OnlineStore/PagesManager';
+import { NavigationManager } from './components/OnlineStore/NavigationManager';
 import { blockTemplates } from './components/PageBuilder/blockTemplates';
 import { BlockLibrary } from './components/PageBuilder/BlockLibrary'; // Force BlockLibrary to be included
 import './components/PageBuilder/PageBuilder.css'; // Force CSS to be included
@@ -372,7 +374,7 @@ function AppsContent() {
 }
 
 function OnlineStoreContent({ user }: { user?: { subdomain?: string; email?: string } }) {
-  type SectionType = 'overview' | 'pages' | 'themes';
+  type SectionType = 'overview' | 'pages' | 'navigation' | 'themes';
   const [activeSection, setActiveSection] = useState<SectionType>('overview');
   
   // Probeer eerst localStorage tenant data als fallback voor snelle render
@@ -435,6 +437,12 @@ function OnlineStoreContent({ user }: { user?: { subdomain?: string; email?: str
           📄 Pages
         </button>
         <button 
+          className={`tab-button ${activeSection === 'navigation' ? 'active' : ''}`}
+          onClick={() => setActiveSection('navigation')}
+        >
+          🧭 Navigation
+        </button>
+        <button 
           className={`tab-button ${activeSection === 'themes' ? 'active' : ''}`}
           onClick={() => setActiveSection('themes')}
         >
@@ -442,7 +450,8 @@ function OnlineStoreContent({ user }: { user?: { subdomain?: string; email?: str
         </button>
       </div>
 
-      {activeSection === 'pages' && <PagesList />}
+      {activeSection === 'pages' && <PagesManager />}
+      {activeSection === 'navigation' && <NavigationManager />}
 
       {activeSection === 'overview' && (
         <div className="dashboard-card">
