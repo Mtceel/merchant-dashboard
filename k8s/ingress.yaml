@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: merchant-dashboard-react
+  namespace: platform-services
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - dashboard.fv-company.com
+    secretName: merchant-react-tls
+  rules:
+  - host: dashboard.fv-company.com
+    http:
+      paths:
+      # ALL traffic (including /api) goes to merchant-dashboard-react nginx
+      # The nginx.conf inside merchant-dashboard will proxy /api/* to platform-api
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: merchant-dashboard-react
+            port:
+              number: 80
