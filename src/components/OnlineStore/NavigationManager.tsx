@@ -29,10 +29,10 @@ export function NavigationManager() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newItem, setNewItem] = useState({ label: '', url: '', type: 'page' as 'page' | 'custom' | 'external' });
 
-  const { data: pages } = useQuery({
+  const { data: pages = [] } = useQuery({
     queryKey: ['pages'],
     queryFn: async () => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('merchant_token');
       const response = await axios.get<Page[]>(`${API_URL}/pages`, {
         headers: { Authorization: `Bearer ${token}` }
       });

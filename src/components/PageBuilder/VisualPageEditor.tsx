@@ -48,7 +48,7 @@ export function VisualPageEditor({ pageId, onClose }: { pageId: number; onClose:
   }, [pageId]);
 
   const loadPage = async () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('merchant_token');
     const response = await axios.get(`${API_URL}/pages/${pageId}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
@@ -63,7 +63,7 @@ export function VisualPageEditor({ pageId, onClose }: { pageId: number; onClose:
   };
 
   const loadBlockTypes = async () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('merchant_token');
     const response = await axios.get(`${API_URL}/block-types`, {
       headers: { Authorization: `Bearer ${token}` }
     });
@@ -272,7 +272,7 @@ export function VisualPageEditor({ pageId, onClose }: { pageId: number; onClose:
   const savePage = async () => {
     if (!page) return;
     
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('merchant_token');
     
     try {
       if (pageId === 0) {

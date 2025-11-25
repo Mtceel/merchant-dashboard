@@ -20,10 +20,10 @@ export function PagesManager() {
   const [newPageSlug, setNewPageSlug] = useState('');
   const queryClient = useQueryClient();
 
-  const { data: pages, isLoading } = useQuery({
+  const { data: pages = [], isLoading } = useQuery({
     queryKey: ['pages'],
     queryFn: async () => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('merchant_token');
       const response = await axios.get<Page[]>(`${API_URL}/pages`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -32,9 +32,9 @@ export function PagesManager() {
   });
 
   const createPageMutation = useMutation({
-    mutationFn: async (data: { title: string; slug: string }) => {
-      const token = localStorage.getItem('token');
-      const response = await axios.post(`${API_URL}/pages`, data, {
+    mutationFn: async (newPage: { title: string; slug: string }) => {
+      const token = localStorage.getItem('merchant_token');
+      const response = await axios.post<Page>(`${API_URL}/pages`, newPage, {
         headers: { Authorization: `Bearer ${token}` }
       });
       return response.data;
@@ -49,7 +49,7 @@ export function PagesManager() {
 
   const deletePageMutation = useMutation({
     mutationFn: async (pageId: number) => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('merchant_token');
       await axios.delete(`${API_URL}/pages/${pageId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });

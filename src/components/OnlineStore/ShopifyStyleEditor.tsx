@@ -32,7 +32,7 @@ export function ShopifyStyleEditor() {
   const { data: pages, isLoading: pagesLoading } = useQuery({
     queryKey: ['pages'],
     queryFn: async () => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('merchant_token');
       const response = await axios.get<Page[]>(`${API_URL}/pages`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -45,7 +45,7 @@ export function ShopifyStyleEditor() {
     queryKey: ['page', selectedPageId],
     enabled: selectedPageId !== null,
     queryFn: async () => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('merchant_token');
       const response = await axios.get<Page>(`${API_URL}/pages/${selectedPageId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -68,7 +68,7 @@ export function ShopifyStyleEditor() {
   // Save page mutation
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('merchant_token');
       await axios.put(
         `${API_URL}/pages/${selectedPageId}`,
         { content: JSON.stringify(blocks) },
