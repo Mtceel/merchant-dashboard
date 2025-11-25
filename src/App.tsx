@@ -8,6 +8,7 @@ import { DiscountsManager } from './components/DiscountsManager';
 import { AnalyticsDashboard } from './components/AnalyticsDashboard';
 import { PagesManager } from './components/OnlineStore/PagesManager';
 import { NavigationManager } from './components/OnlineStore/NavigationManager';
+import { ShopifyStyleEditor } from './components/OnlineStore/ShopifyStyleEditor';
 import { blockTemplates } from './components/PageBuilder/blockTemplates';
 import { BlockLibrary } from './components/PageBuilder/BlockLibrary'; // Force BlockLibrary to be included
 import './components/PageBuilder/PageBuilder.css'; // Force CSS to be included
@@ -373,7 +374,7 @@ function AppsContent() {
 }
 
 function OnlineStoreContent({ user }: { user?: { subdomain?: string; email?: string } }) {
-  type SectionType = 'overview' | 'pages' | 'navigation' | 'themes';
+  type SectionType = 'overview' | 'pages' | 'navigation' | 'editor';
   const [activeSection, setActiveSection] = useState<SectionType>('overview');
   
   // Probeer eerst localStorage tenant data als fallback voor snelle render
@@ -430,6 +431,12 @@ function OnlineStoreContent({ user }: { user?: { subdomain?: string; email?: str
           🏠 Overview
         </button>
         <button 
+          className={`tab-button ${activeSection === 'editor' ? 'active' : ''}`}
+          onClick={() => setActiveSection('editor')}
+        >
+          ✏️ Editor
+        </button>
+        <button 
           className={`tab-button ${activeSection === 'pages' ? 'active' : ''}`}
           onClick={() => setActiveSection('pages')}
         >
@@ -441,14 +448,9 @@ function OnlineStoreContent({ user }: { user?: { subdomain?: string; email?: str
         >
           🧭 Navigation
         </button>
-        <button 
-          className={`tab-button ${activeSection === 'themes' ? 'active' : ''}`}
-          onClick={() => setActiveSection('themes')}
-        >
-          🎨 Themes
-        </button>
       </div>
 
+      {activeSection === 'editor' && <ShopifyStyleEditor />}
       {activeSection === 'pages' && <PagesManager />}
       {activeSection === 'navigation' && <NavigationManager />}
 
@@ -464,19 +466,11 @@ function OnlineStoreContent({ user }: { user?: { subdomain?: string; email?: str
               <p><strong>Status:</strong> <span className="badge badge-success">Published</span></p>
               <div className="store-actions">
                 <a href={storeUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary">View store</a>
-                <button className="btn-secondary" onClick={() => setActiveSection('themes')}>Customize theme</button>
+                <button className="btn-secondary" onClick={() => setActiveSection('editor')}>Edit pages</button>
                 <button className="btn-secondary" onClick={() => setActiveSection('pages')}>Manage pages</button>
               </div>
             </div>
           </div>
-        </div>
-      )}
-
-      {activeSection === 'themes' && (
-        <div className="empty-state">
-          <div className="empty-icon">🎨</div>
-          <h3>Theme customization</h3>
-          <p>Theme editor coming soon</p>
         </div>
       )}
     </div>

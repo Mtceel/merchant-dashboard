@@ -1,0 +1,378 @@
+.shopify-editor {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #f6f6f7;
+}
+
+/* Top Bar */
+.editor-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  background: white;
+  border-bottom: 1px solid #e1e3e5;
+  height: 60px;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.topbar-left h2 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.btn-back {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 1px solid #c9cccf;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.btn-back:hover {
+  background: #f6f6f7;
+}
+
+.topbar-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.page-selector {
+  padding: 0.5rem 1rem;
+  border: 1px solid #c9cccf;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  min-width: 250px;
+  background: white;
+}
+
+.topbar-right {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-preview, .btn-save {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-preview {
+  background: white;
+  border-color: #c9cccf;
+  color: #212326;
+}
+
+.btn-preview:hover {
+  background: #f6f6f7;
+}
+
+.btn-save {
+  background: #008060;
+  border-color: #008060;
+  color: white;
+}
+
+.btn-save:hover:not(:disabled) {
+  background: #006e52;
+}
+
+.btn-save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Main Layout */
+.editor-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Left Sidebar */
+.editor-sidebar {
+  width: 320px;
+  background: white;
+  border-right: 1px solid #e1e3e5;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.sidebar-header {
+  padding: 1rem;
+  border-bottom: 1px solid #e1e3e5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sidebar-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #c9cccf;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-icon:hover {
+  background: #f6f6f7;
+}
+
+.sections-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.empty-sections {
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.empty-sections p {
+  color: #6d7175;
+  margin-bottom: 1rem;
+}
+
+.section-item {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e1e3e5;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.section-item:hover {
+  background: #f6f6f7;
+}
+
+.section-item.active {
+  background: #f1f2f3;
+  border-left: 3px solid #008060;
+}
+
+.section-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.section-icon {
+  font-size: 1.25rem;
+}
+
+.section-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.section-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.btn-icon-sm {
+  width: 24px;
+  height: 24px;
+  border: 1px solid #c9cccf;
+  background: white;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-icon-sm:hover:not(:disabled) {
+  background: #f6f6f7;
+}
+
+.btn-icon-sm:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.btn-icon-sm.btn-danger:hover:not(:disabled) {
+  background: #fef1f1;
+  border-color: #d72c0d;
+}
+
+.sidebar-footer {
+  padding: 1rem;
+  border-top: 1px solid #e1e3e5;
+}
+
+.btn-add-section {
+  width: 100%;
+  padding: 0.75rem;
+  background: white;
+  border: 2px dashed #c9cccf;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #212326;
+}
+
+.btn-add-section:hover {
+  border-color: #008060;
+  color: #008060;
+}
+
+.add-section-types {
+  padding: 1rem;
+  border-top: 1px solid #e1e3e5;
+}
+
+.add-section-types h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.875rem;
+  color: #6d7175;
+  font-weight: 600;
+}
+
+.section-types-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.section-types-grid button {
+  padding: 0.5rem;
+  background: white;
+  border: 1px solid #c9cccf;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s;
+}
+
+.section-types-grid button:hover {
+  border-color: #008060;
+  background: #f6faf9;
+}
+
+/* Center Preview */
+.editor-preview {
+  flex: 1;
+  background: #f6f6f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  overflow: hidden;
+}
+
+.preview-iframe {
+  width: 100%;
+  height: 100%;
+  border: 1px solid #e1e3e5;
+  border-radius: 8px;
+  background: white;
+}
+
+.loading-preview, .no-page-selected {
+  text-align: center;
+  color: #6d7175;
+}
+
+/* Right Settings Panel */
+.editor-settings {
+  width: 360px;
+  background: white;
+  border-left: 1px solid #e1e3e5;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.settings-header {
+  padding: 1rem;
+  border-bottom: 1px solid #e1e3e5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.settings-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.settings-body {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.no-block-selected {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: #6d7175;
+}
+
+.settings-form {
+  padding: 1rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #212326;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #c9cccf;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #008060;
+  box-shadow: 0 0 0 1px #008060;
+}

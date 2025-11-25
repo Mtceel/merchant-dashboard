@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
-import { ShopifyEditor } from '../PageBuilder/ShopifyEditor';
 import './OnlineStore.css';
 
 const API_URL = '/api';
@@ -16,7 +15,6 @@ interface Page {
 }
 
 export function PagesManager() {
-  const [editingPageId, setEditingPageId] = useState<number | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newPageTitle, setNewPageTitle] = useState('');
   const [newPageSlug, setNewPageSlug] = useState('');
@@ -72,15 +70,6 @@ export function PagesManager() {
     setNewPageSlug(slug);
   };
 
-  if (editingPageId !== null) {
-    return (
-      <ShopifyEditor 
-        pageId={editingPageId} 
-        onClose={() => setEditingPageId(null)} 
-      />
-    );
-  }
-
   return (
     <div className="pages-manager">
       <div className="pages-header">
@@ -114,12 +103,6 @@ export function PagesManager() {
                 <p className="page-updated">Updated {new Date(page.updated_at).toLocaleDateString()}</p>
               </div>
               <div className="page-actions">
-                <button 
-                  className="btn-primary"
-                  onClick={() => setEditingPageId(page.id)}
-                >
-                  Edit
-                </button>
                 <button 
                   className="btn-secondary"
                   onClick={() => {
