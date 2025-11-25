@@ -180,7 +180,14 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
     queryKey: ['stats'],
     queryFn: async () => {
       const response = await axios.get(`${API_URL}/dashboard/stats`, axiosConfig);
-      return response.data;
+      const apiStats = response.data.stats || response.data;
+      // Convert snake_case to camelCase and parse strings to numbers
+      return {
+        totalProducts: parseInt(apiStats.product_count || apiStats.totalProducts || '0'),
+        totalOrders: parseInt(apiStats.order_count || apiStats.totalOrders || '0'),
+        totalRevenue: parseFloat(apiStats.total_revenue || apiStats.totalRevenue || '0'),
+        monthlyRevenue: parseFloat(apiStats.revenue_30days || apiStats.monthlyRevenue || '0'),
+      };
     },
     refetchInterval: 30000,
   });
