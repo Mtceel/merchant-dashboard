@@ -142,7 +142,8 @@ export function ShopifyStyleEditor() {
     // Regenerate preview when blocks change
     const renderPreview = async () => {
       try {
-        const response = await axios.post(`${API_URL.replace('/api', '')}/preview`, {
+        // POST to storefront-renderer service (via nginx proxy at /storefront)
+        const response = await axios.post(`${API_URL}/storefront/preview`, {
           blocks,
           tenantId: tenant.id
         });
@@ -271,17 +272,17 @@ export function ShopifyStyleEditor() {
         <div className="editor-preview">
           {pageLoading ? (
             <div className="loading-preview">Loading preview...</div>
-          ) : selectedPage && blocks.length > 0 ? (
+          ) : selectedPage && blocks.length > 0 && previewHtml ? (
             <iframe 
               key={previewKey}
               srcDoc={previewHtml}
-              sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+              sandbox="allow-scripts"
               className="preview-iframe"
               title="Page Preview"
             />
           ) : (
             <div className="no-page-selected">
-              <p>{selectedPage ? 'Add blocks to see preview' : 'Select a page to start editing'}</p>
+              <p>{selectedPage ? (blocks.length === 0 ? 'Add blocks to see preview' : 'Loading preview...') : 'Select a page to start editing'}</p>
             </div>
           )}
         </div>
