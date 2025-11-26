@@ -15,6 +15,7 @@ interface Product {
   inventory_qty: number;
   status: string;
   created_at: string;
+  featured?: boolean;
 }
 
 export function ProductsManager({ token, tenantId }: { token: string; tenantId: string }) {
@@ -68,6 +69,19 @@ export function ProductsManager({ token, tenantId }: { token: string; tenantId: 
     mutationFn: async (id: string) => {
       return axios.delete(
         `/api/products/${id}?tenant_id=${tenantId}`,
+        axiosConfig
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+  });
+
+  const toggleFeaturedMutation = useMutation({
+    mutationFn: async ({ id, featured }: { id: string; featured: boolean }) => {
+      return axios.patch(
+        `/api/products/${id}`,
+        { featured },
         axiosConfig
       );
     },
@@ -184,6 +198,7 @@ export function ProductsManager({ token, tenantId }: { token: string; tenantId: 
               <th>Status</th>
               <th>Inventory</th>
               <th>Price</th>
+              <th>Featured</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -201,6 +216,15 @@ export function ProductsManager({ token, tenantId }: { token: string; tenantId: 
                 </td>
                 <td>{product.inventory_qty} in stock</td>
                 <td>${product.price.toFixed(2)}</td>
+                <td>
+                  <button
+                    className={`featured-toggle ${product.featured ? 'active' : ''}`}
+                    onClick={() => toggleFeaturedMutation.mutate({ id: product.id, featured: !product.featured })}
+                    title={product.featured ? 'Remove from featured' : 'Mark as featured'}
+                  >
+                    {product.featured ? '⭐' : '☆'}
+                  </button>
+                </td>
                 <td>
                   <button onClick={() => setEditingProduct(product)} className="btn-sm">
                     Edit

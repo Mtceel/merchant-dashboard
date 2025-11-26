@@ -1,15 +1,32 @@
 import { useState } from 'react';
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import ThemeEditor from './ThemeEditor';
+import { ProductsManager } from './components/ProductsManager';
+import { OrdersManager } from './components/OrdersManager';
+import { CustomersManager } from './components/CustomersManager';
+import { DiscountsManager } from './components/DiscountsManager';
+import { AnalyticsDashboard } from './components/AnalyticsDashboard';
+import { PagesManager } from './components/OnlineStore/PagesManager';
+import { NavigationManager } from './components/OnlineStore/NavigationManager';
+import { blockTemplates } from './components/PageBuilder/blockTemplates';
+import { BlockLibrary } from './components/PageBuilder/BlockLibrary'; // Force BlockLibrary to be included
+import './components/PageBuilder/PageBuilder.css'; // Force CSS to be included
 import './App.css';
 
+// Ensure blockTemplates and BlockLibrary are included in bundle
+console.log('🚀 App loaded with', blockTemplates.length, 'block templates');
+// Reference BlockLibrary to prevent tree-shaking
+if (typeof window !== 'undefined') {
+  (window as any).__BLOCK_LIBRARY_COMPONENT__ = BlockLibrary;
+}
+
 const queryClient = new QueryClient();
-const API_URL = '/api'; // Proxy via nginx naar internal platform-api
+const API_URL = '/api';
 
 interface AuthResponse {
   token: string;
-  user: { id: number; email: string; role: string };
+  user: { id: number; email: string; role: string; subdomain?: string };
+  tenant?: { id: number; subdomain: string; storeName: string; storeUrl: string };
 }
 
 interface Stats {
@@ -19,17 +36,24 @@ interface Stats {
   monthlyRevenue: number;
 }
 
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  stock: number;
-  featured?: boolean;
-}
+type MenuItem = 'home' | 'orders' | 'products' | 'customers' | 'analytics' | 'marketing' | 'discounts' | 'apps' | 'online-store' | 'settings';
+
+const menuItems: { id: MenuItem; label: string; icon: string }[] = [
+  { id: 'home', label: 'Home', icon: '🏠' },
+  { id: 'orders', label: 'Orders', icon: '📦' },
+  { id: 'products', label: 'Products', icon: '🏷️' },
+  { id: 'customers', label: 'Customers', icon: '👥' },
+  { id: 'analytics', label: 'Analytics', icon: '📊' },
+  { id: 'marketing', label: 'Marketing', icon: '📢' },
+  { id: 'discounts', label: 'Discounts', icon: '🏷️' },
+  { id: 'apps', label: 'Apps', icon: '🧩' },
+  { id: 'online-store', label: 'Online Store', icon: '🌐' },
+  { id: 'settings', label: 'Settings', icon: '⚙️' },
+];
 
 function Login({ onLogin }: { onLogin: (token: string) => void }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('demo@fv-company.com');
+  const [password, setPassword] = useState('demo123');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -40,10 +64,17 @@ function Login({ onLogin }: { onLogin: (token: string) => void }) {
     try {
       const response = await axios.post<AuthResponse>(`${API_URL}/login`, { email, password });
       localStorage.setItem('merchant_token', response.data.token);
-      localStorage.setItem('merchant_login_data', JSON.stringify(response.data));
+      // Sla user data op in localStorage
+      if (response.data.user) {
+        localStorage.setItem('merchant_user', JSON.stringify(response.data.user));
+      }
+      if (response.data.tenant) {
+        localStorage.setItem('merchant_tenant', JSON.stringify(response.data.tenant));
+      }
       onLogin(response.data.token);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Login failed');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      setError(error.response?.data?.error || 'Login failed');
     } finally {
       setLoading(false);
     }
@@ -52,30 +83,80 @@ function Login({ onLogin }: { onLogin: (token: string) => void }) {
   return (
     <div className="login-container">
       <div className="login-card">
-        <h1>🏪 Merchant Dashboard</h1>
-        <p className="subtitle">fv-company.com</p>
+        <div className="login-logo">
+          <div className="logo-icon">🏪</div>
+          <h1>fv-company</h1>
+        </div>
+        <h2>Log in to your store</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Email</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <label>Email address</label>
+            <input 
+              type="email" 
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)} 
+              placeholder="email@example.com"
+              required 
+            />
           </div>
           <div className="form-group">
             <label>Password</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <input 
+              type="password" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)} 
+              placeholder="Enter your password"
+              required 
+            />
           </div>
-          {error && <div className="error">{error}</div>}
+          {error && <div className="error-message">{error}</div>}
           <button type="submit" disabled={loading} className="btn-primary">
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Logging in...' : 'Log in'}
           </button>
         </form>
+        <div className="login-footer">
+          <p>Demo: demo@fv-company.com / demo123</p>
+        </div>
       </div>
     </div>
   );
 }
 
 function Dashboard({ token, onLogout }: { token: string; onLogout: () => void }) {
-  const [currentView, setCurrentView] = useState<'dashboard' | 'theme-editor'>('dashboard');
+  const [activeMenu, setActiveMenu] = useState<MenuItem>('home');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const axiosConfig = { headers: { Authorization: `Bearer ${token}` } };
+
+  const { data: user } = useQuery({
+    queryKey: ['user'],
+    queryFn: async () => {
+      const response = await axios.get(`${API_URL}/user`, axiosConfig);
+      // Update localStorage met nieuwe data
+      if (response.data) {
+        const userData = {
+          id: response.data.id,
+          email: response.data.email,
+          fullName: response.data.fullName,
+          role: response.data.role,
+          subdomain: response.data.subdomain,
+        };
+        localStorage.setItem('merchant_user', JSON.stringify(userData));
+        
+        if (response.data.subdomain) {
+          const tenantData = {
+            subdomain: response.data.subdomain,
+            storeName: response.data.storeName,
+            storeUrl: response.data.storeUrl,
+          };
+          localStorage.setItem('merchant_tenant', JSON.stringify(tenantData));
+        }
+      }
+      return response.data;
+    },
+    // Refresh elke 5 minuten om data up-to-date te houden
+    staleTime: 5 * 60 * 1000,
+    refetchInterval: 5 * 60 * 1000,
+  });
 
   const { data: stats } = useQuery<Stats>({
     queryKey: ['stats'],
@@ -83,112 +164,369 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
       const response = await axios.get(`${API_URL}/dashboard/stats`, axiosConfig);
       return response.data;
     },
-    refetchInterval: 15000,
+    refetchInterval: 30000,
   });
 
-  const { data: products, refetch: refetchProducts } = useQuery<Product[]>({
-    queryKey: ['products'],
-    queryFn: async () => {
-      const response = await axios.get(`${API_URL}/products`, axiosConfig);
-      return response.data;
-    },
-  });
+  // Get tenant ID from localStorage or user data
+  const getTenantId = () => {
+    const tenant = localStorage.getItem('merchant_tenant');
+    if (tenant) {
+      const tenantData = JSON.parse(tenant);
+      return tenantData.id || user?.tenantId || '1';
+    }
+    return user?.tenantId || '1';
+  };
 
-  const toggleFeatured = async (productId: number, currentFeatured: boolean) => {
-    try {
-      await axios.patch(
-        `${API_URL}/products/${productId}`,
-        { featured: !currentFeatured },
-        axiosConfig
-      );
-      refetchProducts();
-    } catch (error) {
-      console.error('Failed to toggle featured:', error);
+  const tenantId = getTenantId();
+
+  const renderContent = () => {
+    switch (activeMenu) {
+      case 'home':
+        return <HomeContent stats={stats} />;
+      case 'products':
+        return <ProductsManager token={token} tenantId={tenantId} />;
+      case 'orders':
+        return <OrdersManager token={token} tenantId={tenantId} />;
+      case 'customers':
+        return <CustomersManager token={token} tenantId={tenantId} />;
+      case 'analytics':
+        return <AnalyticsDashboard token={token} tenantId={tenantId} />;
+      case 'marketing':
+        return <MarketingContent />;
+      case 'discounts':
+        return <DiscountsManager token={token} tenantId={tenantId} />;
+      case 'apps':
+        return <AppsContent />;
+      case 'online-store':
+        return <OnlineStoreContent user={user} />;
+      case 'settings':
+        return <SettingsContent />;
+      default:
+        return <HomeContent stats={stats} />;
     }
   };
 
-  if (currentView === 'theme-editor') {
-    return <ThemeEditor token={token} onBack={() => setCurrentView('dashboard')} />;
-  }
+  return (
+    <div className="shopify-layout">
+      <nav className="top-nav">
+        <button 
+          className="mobile-menu-btn"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          ☰
+        </button>
+        <div className="top-nav-brand">
+          <span className="brand-icon">🏪</span>
+          <span className="brand-name">My Store</span>
+        </div>
+        <div className="top-nav-actions">
+          <button className="nav-icon-btn" title="Search">🔍</button>
+          <button className="nav-icon-btn" title="Notifications">🔔</button>
+          <button className="nav-icon-btn" onClick={onLogout} title="Logout">🚪</button>
+        </div>
+      </nav>
+
+      <aside className={`sidebar ${mobileMenuOpen ? 'mobile-open' : ''}`}>
+        <div className="sidebar-content">
+          {menuItems.map((item) => (
+            <button
+              key={item.id}
+              className={`sidebar-item ${activeMenu === item.id ? 'active' : ''}`}
+              onClick={() => {
+                setActiveMenu(item.id);
+                setMobileMenuOpen(false);
+              }}
+            >
+              <span className="sidebar-icon">{item.icon}</span>
+              <span className="sidebar-label">{item.label}</span>
+            </button>
+          ))}
+        </div>
+      </aside>
+
+      {mobileMenuOpen && (
+        <div 
+          className="mobile-overlay" 
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      <main className="main-content">
+        {renderContent()}
+      </main>
+    </div>
+  );
+}
+
+function HomeContent({ stats }: { stats?: Stats }) {
+  return (
+    <div className="page-content">
+      <div className="page-header">
+        <h1>Home</h1>
+        <button className="btn-primary">Add product</button>
+      </div>
+
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-label">Total sales today</div>
+          <div className="stat-value">${stats?.monthlyRevenue?.toFixed(2) || '0.00'}</div>
+          <div className="stat-change positive">↑ +12.5% from yesterday</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label">Orders today</div>
+          <div className="stat-value">{stats?.totalOrders || 0}</div>
+          <div className="stat-change positive">↑ +5.2% from yesterday</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label">Total products</div>
+          <div className="stat-value">{stats?.totalProducts || 0}</div>
+          <div className="stat-change neutral">No change</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label">Lifetime revenue</div>
+          <div className="stat-value">${stats?.totalRevenue?.toFixed(2) || '0.00'}</div>
+          <div className="stat-change positive">↑ All time</div>
+        </div>
+      </div>
+
+      <div className="cards-grid">
+        <div className="dashboard-card">
+          <div className="card-header">
+            <h3>📊 Sales overview</h3>
+            <select className="card-select">
+              <option>Last 7 days</option>
+              <option>Last 30 days</option>
+              <option>Last 90 days</option>
+            </select>
+          </div>
+          <div className="card-body">
+            <div className="chart-placeholder">
+              <p>📈 Sales chart will appear here</p>
+              <p className="text-muted">Integrate with analytics library</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="dashboard-card">
+          <div className="card-header">
+            <h3>🎯 Quick actions</h3>
+          </div>
+          <div className="card-body">
+            <div className="quick-actions">
+              <button className="quick-action-btn">➕ Add product</button>
+              <button className="quick-action-btn">📦 View orders</button>
+              <button className="quick-action-btn">👥 Add customer</button>
+              <button className="quick-action-btn">🏷️ Create discount</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MarketingContent() {
+  return (
+    <div className="page-content">
+      <div className="page-header">
+        <h1>Marketing</h1>
+        <button className="btn-primary">Create campaign</button>
+      </div>
+      <div className="empty-state">
+        <div className="empty-icon">📢</div>
+        <h3>Start your marketing campaigns</h3>
+        <p>Reach more customers with email, social, and ads</p>
+      </div>
+    </div>
+  );
+}
+
+function AppsContent() {
+  return (
+    <div className="page-content">
+      <div className="page-header">
+        <h1>Apps</h1>
+        <button className="btn-primary">Visit App Store</button>
+      </div>
+      <div className="apps-grid">
+        <div className="app-card">
+          <div className="app-icon">📧</div>
+          <h4>Email Marketing</h4>
+          <p>Send newsletters and promotions</p>
+          <button className="btn-secondary">Install</button>
+        </div>
+        <div className="app-card">
+          <div className="app-icon">📦</div>
+          <h4>Inventory Management</h4>
+          <p>Track stock levels automatically</p>
+          <button className="btn-secondary">Install</button>
+        </div>
+        <div className="app-card">
+          <div className="app-icon">💬</div>
+          <h4>Live Chat</h4>
+          <p>Support customers in real-time</p>
+          <button className="btn-secondary">Install</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OnlineStoreContent({ user }: { user?: { subdomain?: string; email?: string } }) {
+  type SectionType = 'overview' | 'pages' | 'navigation' | 'themes';
+  const [activeSection, setActiveSection] = useState<SectionType>('overview');
+  
+  // Probeer eerst localStorage tenant data als fallback voor snelle render
+  const getLocalTenantData = () => {
+    try {
+      const tenantData = localStorage.getItem('merchant_tenant');
+      if (tenantData) {
+        return JSON.parse(tenantData);
+      }
+    } catch (e) {
+      console.error('Failed to parse tenant data:', e);
+    }
+    return null;
+  };
+
+  const localTenant = getLocalTenantData();
+  
+  // Bepaal de store URL - gebruik API data (user) als die er is, anders localStorage
+  const getStoreUrl = () => {
+    // Eerst API user data (real-time)
+    if (user?.subdomain) {
+      return `https://${user.subdomain}.fv-company.com`;
+    }
+    // Dan localStorage tenant data (cached)
+    if (localTenant?.subdomain) {
+      return `https://${localTenant.subdomain}.fv-company.com`;
+    }
+    // Fallback: gebruik email prefix als subdomain
+    if (user?.email) {
+      const emailPrefix = user.email.split('@')[0];
+      return `https://${emailPrefix}.fv-company.com`;
+    }
+    return 'https://yourstore.fv-company.com';
+  };
+
+  const storeUrl = getStoreUrl();
+  const storeName = user?.subdomain ? 
+    (user as any).storeName || localTenant?.storeName || 'Your Store' : 
+    localTenant?.storeName || 'Your Store';
 
   return (
-    <div className="dashboard">
-      <header className="header">
-        <div>
-          <h1>🏪 Merchant Dashboard</h1>
-          <p>Manage your store</p>
-        </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button onClick={() => setCurrentView('theme-editor')} className="btn-primary">
-            🎨 Online Store
-          </button>
-          <button onClick={onLogout} className="btn-secondary">Logout</button>
-        </div>
-      </header>
+    <div className="page-content">
+      <div className="page-header">
+        <h1>Online Store</h1>
+        <a href={storeUrl} target="_blank" rel="noopener noreferrer" className="btn-primary">View store</a>
+      </div>
 
-      <main className="content">
-        <div className="stats-grid">
-          <div className="stat-card">
-            <div className="stat-value">{stats?.totalProducts || 0}</div>
-            <div className="stat-label">Total Products</div>
+      {/* Submenu for Online Store sections */}
+      <div className="online-store-tabs">
+        <button 
+          className={`tab-button ${activeSection === 'overview' ? 'active' : ''}`}
+          onClick={() => setActiveSection('overview')}
+        >
+          🏠 Overview
+        </button>
+        <button 
+          className={`tab-button ${activeSection === 'pages' ? 'active' : ''}`}
+          onClick={() => setActiveSection('pages')}
+        >
+          📄 Pages
+        </button>
+        <button 
+          className={`tab-button ${activeSection === 'navigation' ? 'active' : ''}`}
+          onClick={() => setActiveSection('navigation')}
+        >
+          🧭 Navigation
+        </button>
+        <button 
+          className={`tab-button ${activeSection === 'themes' ? 'active' : ''}`}
+          onClick={() => setActiveSection('themes')}
+        >
+          🎨 Themes
+        </button>
+      </div>
+
+      {activeSection === 'pages' && <PagesManager />}
+      {activeSection === 'navigation' && <NavigationManager />}
+
+      {activeSection === 'overview' && (
+        <div className="dashboard-card">
+          <div className="card-header">
+            <h3>🌐 {storeName}</h3>
           </div>
-          <div className="stat-card">
-            <div className="stat-value">{stats?.totalOrders || 0}</div>
-            <div className="stat-label">Total Orders</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-value">${stats?.totalRevenue?.toFixed(2) || '0.00'}</div>
-            <div className="stat-label">Total Revenue</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-value">${stats?.monthlyRevenue?.toFixed(2) || '0.00'}</div>
-            <div className="stat-label">Monthly Revenue</div>
+          <div className="card-body">
+            <div className="store-preview">
+              <p><strong>Store URL:</strong> {storeUrl}</p>
+              <p><strong>Theme:</strong> Default Theme</p>
+              <p><strong>Status:</strong> <span className="badge badge-success">Published</span></p>
+              <div className="store-actions">
+                <a href={storeUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary">View store</a>
+                <button className="btn-secondary" onClick={() => setActiveSection('themes')}>Customize theme</button>
+                <button className="btn-secondary" onClick={() => setActiveSection('pages')}>Manage pages</button>
+              </div>
+            </div>
           </div>
         </div>
+      )}
 
-        <section className="products-section">
-          <h2>Your Products</h2>
-          {products && products.length > 0 ? (
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Price</th>
-                  <th>Stock</th>
-                  <th>Featured</th>
-                </tr>
-              </thead>
-              <tbody>
-                {products.map((product) => (
-                  <tr key={product.id}>
-                    <td>{product.id}</td>
-                    <td>{product.name}</td>
-                    <td>${product.price.toFixed(2)}</td>
-                    <td>{product.stock}</td>
-                    <td>
-                      <button
-                        className={`featured-toggle ${product.featured ? 'active' : ''}`}
-                        onClick={() => toggleFeatured(product.id, product.featured || false)}
-                        title={product.featured ? 'Remove from featured' : 'Mark as featured'}
-                      >
-                        {product.featured ? '⭐' : '☆'}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <p className="empty-state">No products yet. Create your first product!</p>
-          )}
-        </section>
+      {activeSection === 'themes' && (
+        <div className="empty-state">
+          <div className="empty-icon">🎨</div>
+          <h3>Theme customization</h3>
+          <p>Theme editor coming soon</p>
+        </div>
+      )}
+    </div>
+  );
+}
 
-        <section className="info-section">
-          <h3>✅ Real Data - No Mocks</h3>
-          <p>All data is fetched from PostgreSQL database. This dashboard uses React + TypeScript.</p>
-        </section>
-      </main>
+function SettingsContent() {
+  return (
+    <div className="page-content">
+      <div className="page-header">
+        <h1>Settings</h1>
+      </div>
+
+      <div className="settings-grid">
+        <div className="setting-card">
+          <div className="setting-icon">🏪</div>
+          <div className="setting-content">
+            <h4>Store details</h4>
+            <p>Manage your store name, address, and contact information</p>
+          </div>
+          <button className="btn-secondary">Manage</button>
+        </div>
+
+        <div className="setting-card">
+          <div className="setting-icon">💳</div>
+          <div className="setting-content">
+            <h4>Payments</h4>
+            <p>Configure payment providers and methods</p>
+          </div>
+          <button className="btn-secondary">Manage</button>
+        </div>
+
+        <div className="setting-card">
+          <div className="setting-icon">🚚</div>
+          <div className="setting-content">
+            <h4>Shipping and delivery</h4>
+            <p>Set up shipping rates and delivery options</p>
+          </div>
+          <button className="btn-secondary">Manage</button>
+        </div>
+
+        <div className="setting-card">
+          <div className="setting-icon">👤</div>
+          <div className="setting-content">
+            <h4>Account</h4>
+            <p>Manage your account settings and preferences</p>
+          </div>
+          <button className="btn-secondary">Manage</button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -201,7 +539,15 @@ function App() {
       {!token ? (
         <Login onLogin={setToken} />
       ) : (
-        <Dashboard token={token} onLogout={() => { localStorage.removeItem('merchant_token'); setToken(null); }} />
+        <Dashboard 
+          token={token} 
+          onLogout={() => { 
+            localStorage.removeItem('merchant_token');
+            localStorage.removeItem('merchant_user');
+            localStorage.removeItem('merchant_tenant');
+            setToken(null); 
+          }} 
+        />
       )}
     </QueryClientProvider>
   );
