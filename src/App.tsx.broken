@@ -22,6 +22,12 @@ interface Stats {
 
 type MenuItem = 'home' | 'products' | 'online-store';
 
+const menuItems: { id: MenuItem; label: string; icon: string }[] = [
+  { id: 'home', label: 'Home', icon: '🏠' },
+  { id: 'products', label: 'Products', icon: '🏷️' },
+  { id: 'online-store', label: 'Online Store', icon: '🌐' },
+];
+
 function Login({ onLogin }: { onLogin: (token: string) => void }) {
   const [email, setEmail] = useState('demo@fv-company.com');
   const [password, setPassword] = useState('demo123');
@@ -44,13 +50,10 @@ function Login({ onLogin }: { onLogin: (token: string) => void }) {
   };
 
   return (
-    <div className="login-page">
+    <div className="login-container">
       <div className="login-card">
-        <div className="login-header">
-          <div className="login-logo">🏪</div>
-          <h1>fv-company</h1>
-          <p>Log in to your store</p>
-        </div>
+        <h1>🏪 Merchant Dashboard</h1>
+        <p className="subtitle">fv-company.com</p>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Email</label>
@@ -60,9 +63,9 @@ function Login({ onLogin }: { onLogin: (token: string) => void }) {
             <label>Password</label>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
-          {error && <div className="error-message">{error}</div>}
+          {error && <div className="error">{error}</div>}
           <button type="submit" disabled={loading} className="btn-primary">
-            {loading ? 'Logging in...' : 'Log in'}
+            {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
       </div>
@@ -72,7 +75,7 @@ function Login({ onLogin }: { onLogin: (token: string) => void }) {
 
 function Dashboard({ token, onLogout }: { token: string; onLogout: () => void }) {
   const [activeMenu, setActiveMenu] = useState<MenuItem>('home');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const axiosConfig = { headers: { Authorization: `Bearer ${token}` } };
 
   const { data: stats } = useQuery<Stats>({
@@ -86,34 +89,32 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
 
   const renderContent = () => {
     if (activeMenu === 'products') {
-      return <ProductsManager token={token} />;
+      return <ProductsManager token={token} tenantId="1" />;
     }
     if (activeMenu === 'online-store') {
       return <ThemeEditor token={token} onBack={() => setActiveMenu('home')} />;
     }
-    
-    // Home content
     return (
-      <div className="home-content">
+      <div className="page-content">
         <div className="page-header">
           <h1>Home</h1>
         </div>
         <div className="stats-grid">
           <div className="stat-card">
-            <div className="stat-label">Total products</div>
             <div className="stat-value">{stats?.totalProducts || 0}</div>
+            <div className="stat-label">Total Products</div>
           </div>
           <div className="stat-card">
-            <div className="stat-label">Total orders</div>
             <div className="stat-value">{stats?.totalOrders || 0}</div>
+            <div className="stat-label">Total Orders</div>
           </div>
           <div className="stat-card">
-            <div className="stat-label">Total revenue</div>
             <div className="stat-value">${stats?.totalRevenue?.toFixed(2) || '0.00'}</div>
+            <div className="stat-label">Total Revenue</div>
           </div>
           <div className="stat-card">
-            <div className="stat-label">This month</div>
             <div className="stat-value">${stats?.monthlyRevenue?.toFixed(2) || '0.00'}</div>
+            <div className="stat-label">Monthly Revenue</div>
           </div>
         </div>
       </div>
@@ -121,57 +122,53 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
   };
 
   return (
-    <div className="shopify-dashboard">
-      {/* Top Bar */}
-      <header className="top-bar">
-        <div className="top-bar-left">
-          <button className="menu-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
+    <div className="dashboard">
+      <header className="header">
+        <div className="header-left">
+          <button 
+            className="mobile-menu-btn"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
             ☰
           </button>
-          <div className="store-name">
-            <span className="store-icon">🏪</span>
-            <span>My Store</span>
+          <div className="store-info">
+            <h1>🏪 My Store</h1>
           </div>
         </div>
-        <div className="top-bar-right">
-          <button className="top-bar-icon" title="Search">🔍</button>
-          <button className="top-bar-icon" title="Notifications">🔔</button>
-          <button className="top-bar-icon" onClick={onLogout} title="Logout">🚪</button>
+        <div className="header-right">
+          <button className="header-icon">🔍</button>
+          <button className="header-icon">🔔</button>
+          <button onClick={onLogout} className="header-icon">🚪</button>
         </div>
       </header>
 
-      {/* Sidebar */}
-      <aside className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
-        <nav className="sidebar-nav">
-          <button
-            className={`nav-item ${activeMenu === 'home' ? 'active' : ''}`}
-            onClick={() => setActiveMenu('home')}
-          >
-            <span className="nav-icon">🏠</span>
-            <span className="nav-label">Home</span>
-          </button>
-          <button
-            className={`nav-item ${activeMenu === 'products' ? 'active' : ''}`}
-            onClick={() => setActiveMenu('products')}
-          >
-            <span className="nav-icon">🏷️</span>
-            <span className="nav-label">Products</span>
-          </button>
-          <button
-            className={`nav-item ${activeMenu === 'online-store' ? 'active' : ''}`}
-            onClick={() => setActiveMenu('online-store')}
-          >
-            <span className="nav-icon">🌐</span>
-            <span className="nav-label">Online Store</span>
-          </button>
-        </nav>
+      <aside className={`sidebar ${mobileMenuOpen ? 'mobile-open' : ''}`}>
+        <div className="sidebar-content">
+          {menuItems.map((item) => (
+            <button
+              key={item.id}
+              className={`sidebar-item ${activeMenu === item.id ? 'active' : ''}`}
+              onClick={() => {
+                setActiveMenu(item.id);
+                setMobileMenuOpen(false);
+              }}
+            >
+              <span className="sidebar-icon">{item.icon}</span>
+              <span className="sidebar-label">{item.label}</span>
+            </button>
+          ))}
+        </div>
       </aside>
 
-      {/* Main Content */}
-      <main className={`main-content ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
-        <div className="content-wrapper">
-          {renderContent()}
-        </div>
+      {mobileMenuOpen && (
+        <div 
+          className="mobile-overlay" 
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      <main className="main-content">
+        {renderContent()}
       </main>
     </div>
   );
@@ -185,13 +182,7 @@ function App() {
       {!token ? (
         <Login onLogin={setToken} />
       ) : (
-        <Dashboard 
-          token={token} 
-          onLogout={() => { 
-            localStorage.removeItem('merchant_token'); 
-            setToken(null); 
-          }} 
-        />
+        <Dashboard token={token} onLogout={() => { localStorage.removeItem('merchant_token'); setToken(null); }} />
       )}
     </QueryClientProvider>
   );

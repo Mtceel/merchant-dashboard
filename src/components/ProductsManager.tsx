@@ -18,7 +18,7 @@ interface Product {
   featured?: boolean;
 }
 
-export function ProductsManager({ token, tenantId }: { token: string; tenantId: string }) {
+export function ProductsManager({ token }: { token: string }) {
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const queryClient = useQueryClient();
@@ -26,12 +26,9 @@ export function ProductsManager({ token, tenantId }: { token: string; tenantId: 
   const axiosConfig = { headers: { Authorization: `Bearer ${token}` } };
 
   const { data: productsData, isLoading } = useQuery({
-    queryKey: ['products', tenantId],
+    queryKey: ['products'],
     queryFn: async () => {
-      const response = await axios.get(
-        `/api/products?tenant_id=${tenantId}`,
-        axiosConfig
-      );
+      const response = await axios.get('/api/products', axiosConfig);
       return response.data;
     },
     refetchInterval: 10000,
@@ -39,11 +36,7 @@ export function ProductsManager({ token, tenantId }: { token: string; tenantId: 
 
   const createMutation = useMutation({
     mutationFn: async (data: Partial<Product>) => {
-      return axios.post(
-        '/api/products',
-        { ...data, tenant_id: tenantId },
-        axiosConfig
-      );
+      return axios.post('/api/products', data, axiosConfig);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
@@ -53,11 +46,7 @@ export function ProductsManager({ token, tenantId }: { token: string; tenantId: 
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...data }: Partial<Product> & { id: string }) => {
-      return axios.put(
-        `/api/products/${id}`,
-        { ...data, tenant_id: tenantId },
-        axiosConfig
-      );
+      return axios.put(`/api/products/${id}`, data, axiosConfig);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
@@ -67,10 +56,7 @@ export function ProductsManager({ token, tenantId }: { token: string; tenantId: 
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      return axios.delete(
-        `/api/products/${id}?tenant_id=${tenantId}`,
-        axiosConfig
-      );
+      return axios.delete(`/api/products/${id}`, axiosConfig);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });

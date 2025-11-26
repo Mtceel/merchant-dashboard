@@ -176,19 +176,16 @@ export default function ThemeEditor({ token, onBack }: ThemeEditorProps) {
 
   const currentSection = localSettings.sections.find(s => s.id === selectedSection);
   
-  // Get tenant info from localStorage (saved during login)
-  const loginData = localStorage.getItem('merchant_login_data');
-  let subdomain = 'demo';
+  // Get user info to determine store URL
+  const { data: userInfo } = useQuery({
+    queryKey: ['tenant-info'],
+    queryFn: async () => {
+      const response = await axios.get(`${API_URL}/tenant/info`, axiosConfig);
+      return response.data;
+    },
+  });
   
-  if (loginData) {
-    try {
-      const parsed = JSON.parse(loginData);
-      subdomain = parsed.tenant?.subdomain || 'demo';
-    } catch (e) {
-      console.error('Failed to parse login data:', e);
-    }
-  }
-  
+  const subdomain = userInfo?.subdomain || 'demo';
   const previewUrl = `https://${subdomain}.fv-company.com?preview=${previewKey}`;
 
   return (
