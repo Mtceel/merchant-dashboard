@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: merchant-dashboard-react
+  namespace: platform-services
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: merchant-dashboard-react
+  template:
+    metadata:
+      labels:
+        app: merchant-dashboard-react
+    spec:
+      containers:
+      - name: merchant-dashboard
+        image: mtceel/merchant-dashboard:111d11c
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
